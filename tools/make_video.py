@@ -1,4 +1,6 @@
-"""Turn a phone video into an MJPEG header the ESP32-C3 plays straight from flash.
+"""Turn any video into an MJPEG header the ESP32-C3 plays straight from flash.
+Tall, wide or square clips all work: each frame is scaled to cover the 240x280
+panel and cropped to fit.
 
     python tools/make_video.py videos/my_clip.mp4 main
     python tools/make_video.py videos/my_other_clip.mp4 alt --masks main
@@ -26,13 +28,14 @@ SOURCE_FPS = 60          # frames pulled from the phone video before retiming
 QUALITY = 70             # JPEG quality; higher = sharper but bigger and slower
 
 # One entry per scene (clip between hard cuts); the last entry repeats.
-# The video is 9:16 and the panel 6:7, so each frame is scaled to 240 wide and a
-# 280-tall window is cut out of it. 0.0 keeps the top, 1.0 the bottom.
+# Each frame is scaled to cover the 6:7 panel, then a 240x280 window is cut out.
+# On tall clips the window slides up/down (0.0 = top, 1.0 = bottom), on wide
+# clips left/right (0.0 = left, 1.0 = right).
 SCENE_CROP = [0.5]
 SCENE_LENGTH = [None]  # seconds on the card; None = original length, longer = slowed down
 # Per scene: "orbit" = ORBIT_TEXT flowing around you, "sticker" = white outline, None = nothing.
 SCENE_EFFECT = ["orbit", None, None]
-LABELS = ["TRAIN", "FIGHT", "BUILD"]
+LABELS = ["TRAIN", "FIGHT", "BUILD"]  # None skips a scene's label; [] turns labels off
 
 ORBIT_TEXT = "aura"      # the word that flows around you
 # Agency FB (labels) and Segoe UI (orbit text) ship with Windows. On macOS or
@@ -60,9 +63,11 @@ ORBIT_FONT = font(ORBIT_SIZE, ORBIT_FONT_FILE)
 
 
 def extract_frames(src, out_dir):
+    # Cover the panel: clips taller than 6:7 come out 240 wide, wider ones 280 tall.
+    cover = f"scale=w='if(gt(a,{W}/{H}),-2,{W})':h='if(gt(a,{W}/{H}),{H},-2)':flags=lanczos"
     subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(src),
-         "-vf", f"fps={SOURCE_FPS},scale={W}:-2:flags=lanczos",
+         "-vf", f"fps={SOURCE_FPS},{cover}",
          str(out_dir / "%04d.png")],
         check=True)
     return sorted(out_dir.glob("*.png"))
@@ -202,8 +207,9 @@ def sticker(frame, mask):
 
 def crop(frame, scene):
     pos = SCENE_CROP[min(scene, len(SCENE_CROP) - 1)]
-    top = round((frame.height - H) * pos)
-    return frame.crop((0, top, W, top + H))
+    left = round(max(0, frame.width - W) * pos)
+    top = round(max(0, frame.height - H) * pos)
+    return frame.crop((left, top, left + W, top + H))
 
 
 def label(frame, scene, k):
@@ -312,7 +318,10 @@ def main():
             m = Image.open(masks[round(src * (len(masks) - 1) / (len(frames) - 1))]).convert("L")
             m = m.resize(f.size, Image.LANCZOS) if m.size != f.size else m
             f = orbit(f, m, k) if effect == "orbit" else sticker(f, m)
-        out.append(label(crop(f, scene), scene, k))
+        f = crop(f, scene)
+        if LABELS and LABELS[min(scene, len(LABELS) - 1)] is not None:
+            f = label(f, scene, k)
+        out.append(f)
 
     jpegs = []
     for f in out:

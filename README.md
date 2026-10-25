@@ -3,13 +3,11 @@
 **An ID card that plays a video of you.** A 1.69" color screen loops a short clip of you, and a small OLED shows your name with your email or handle scrolling along the top. It runs on an ESP32-C3 Super Mini and a rechargeable LiPo, all on one perfboard.
 The clip comes with built-in effects: scene labels that type themselves in (`01 // TRAIN`), and a word that flows around you like a halo.
 
-<!-- TODO: replace the mock and the demo GIF with photos of your own card (images/card_front.jpg, images/card_back.jpg) -->
+<!-- TODO: add photos of the finished card (images/card_front.jpg, images/card_back.jpg) -->
 <p align="center">
-  <img src="images/card_mock.png" width="460" alt="The card: 1.69 inch TFT on the left playing the clip, OLED with name and title on the right, ESP32-C3 below it">
-  &nbsp;
-  <img src="images/tft_demo.gif" width="200" alt="The TFT loop: scene labels typing in and a word flowing around the figure">
+  <img src="images/teaser.webp" width="640" alt="The finished card running: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
   <br>
-  <sub><b>Left:</b> the card layout &nbsp;·&nbsp; <b>Right:</b> the built-in placeholder clip, as it plays on the TFT</sub>
+  <sub>The finished card: the TFT loops the clip, the OLED shows the name tag with the email scrolling along the top</sub>
 </p>
 
 ---
@@ -247,9 +245,9 @@ Run the 8 TFT wires from the [table](#tft-8-pins). Then plug the C3 into USB (no
 
 Add the 4 OLED wires and press **RESET** on the C3. No reflash needed: your name and title appear, and the top line scrolls.
 
-This is the back of the board at this point, with both screens wired and the power section still to come:
+This is the back of the board at this point, with both screens wired and the power section still to come. Each part's outline is shaded around its pins: **blue** for the TFT, **yellow** for the OLED, **purple** for the ESP32-C3. It's the back, so everything is mirrored compared to the front:
 
-<p align="center"><img src="images/board_wiring_back.jpg" width="520" alt="Back of the 60 x 80 mm perfboard with the TFT and OLED wiring done, before the battery circuit"></p>
+<p align="center"><img src="images/board_wiring_back.jpg" width="640" alt="Back of the 60 x 80 mm perfboard with the TFT and OLED wired, before the battery circuit. Color-coded outlines: TFT in blue on the right with its 8-pin header, OLED in yellow at top left with its 4-pin header, ESP32-C3 in purple at bottom left with two rows of 8 pins"></p>
 
 ### 8. Wire the power section
 
@@ -330,7 +328,9 @@ const char *TITLE = "your title";       // one short line under the name
 
 ### Your video
 
-The firmware ships with a placeholder clip. To use your own:
+The firmware ships with a placeholder clip (below). **You can use any video you like.** The three scenes with TRAIN / FIGHT / BUILD labels are just how the example is set up, not a template you have to follow.
+
+<p align="center"><img src="images/tft_demo.gif" width="200" alt="The placeholder clip as it plays on the TFT: scene labels typing in and a word flowing around the figure"></p>
 
 ```bash
 pip install -r tools/requirements.txt
@@ -339,15 +339,16 @@ python tools/make_video.py videos/my_clip.mp4 main
 
 That replaces `firmware/CyberID/video_main.h` and writes `videos/main_preview.jpg`, a contact sheet of every frame. Check it, then upload.
 
-- Use a **vertical (9:16) phone video**, about **3 seconds** long. Hard cuts between shots are detected automatically, and each shot is a **scene** with its own settings.
-- The screen is 6:7, so each frame is cropped. `SCENE_CROP` picks the window: `0.0` keeps the top of the frame, `1.0` the bottom.
+- **Any shape:** vertical, horizontal or square. The screen is 6:7, so each frame is scaled to cover it and cropped to fit. `SCENE_CROP` picks where the window sits: `0.0` is the top (or left, for wide clips) and `1.0` the bottom (or right).
+- **Any number of shots:** one continuous shot or many. Hard cuts are detected automatically, and each shot becomes a **scene** with its own crop, length, label and effect.
+- **Length:** about 15 seconds of video fits in total, at 16 fps. Short loops of 3 to 6 seconds look best on a card.
 - The tools need **ffmpeg** on your PATH.
 
 ### Effects
 
 Each scene can have a label and one effect, set at the top of [`make_video.py`](tools/make_video.py):
 
-- **Labels:** `01 // TRAIN`, `02 // FIGHT`, `03 // BUILD` type themselves in with a blinking cursor and a short glitch. Change the words in `LABELS`.
+- **Labels:** `01 // TRAIN`, `02 // FIGHT`, `03 // BUILD` type themselves in with a blinking cursor and a short glitch. Change the words in `LABELS`, use `None` to skip one scene's label, or `LABELS = []` for no labels at all.
 - **`"orbit"`:** a word (`ORBIT_TEXT`) flows clockwise around you, with a soft glow.
 - **`"sticker"`:** a white sticker outline around you.
 
@@ -402,10 +403,10 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| `SCENE_CROP` | `[0.5]` | Vertical crop per scene (0 = top, 1 = bottom). The last value repeats for later scenes |
+| `SCENE_CROP` | `[0.5]` | Crop position per scene: 0 = top/left, 1 = bottom/right. The last value repeats for later scenes |
 | `SCENE_LENGTH` | `[None]` | Seconds per scene on the card. `None` keeps the original length; longer slows it down |
 | `SCENE_EFFECT` | `["orbit", None, None]` | `"orbit"`, `"sticker"` or `None`, per scene |
-| `LABELS` | `TRAIN`, `FIGHT`, `BUILD` | One label per scene |
+| `LABELS` | `TRAIN`, `FIGHT`, `BUILD` | One label per scene. `None` skips a scene, `[]` turns labels off |
 | `ORBIT_TEXT` | `"aura"` | The word that flows around you |
 | `ORBIT_SPACING`, `ORBIT_SPEED` | 14 px, 7 px/frame | Gap between the words, and how fast they move |
 | `FPS` | `16` | Frames per second on the card. The C3 manages about 17–18, so 16 shows every frame |

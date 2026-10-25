@@ -12,9 +12,11 @@ right section of it instead of repeating it.
   `TITLE`, the video include).
 - `firmware/CyberID/video_<name>.h`: generated clips. Never edit by hand; regenerate with
   `tools/make_video.py`.
-- `tools/make_video.py`: phone video → header. Per-scene settings at the top (`SCENE_CROP`,
+- `tools/make_video.py`: any video → header. Tall, wide or square clips all work (frames are
+  scaled to cover 240×280 and cropped). Per-scene settings at the top (`SCENE_CROP`,
   `SCENE_LENGTH`, `SCENE_EFFECT`, `LABELS`, `ORBIT_*`). Writes `videos/<name>_preview.jpg`, a
-  contact sheet: read it to check crops and effects.
+  contact sheet: read it to check crops and effects. The three TRAIN/FIGHT/BUILD scenes are only
+  the example; people can use any clip, any number of scenes, labels or none.
 - `tools/make_masks.py`: rembg cut-outs (`videos/masks/<name>/`) for the `"orbit"` and
   `"sticker"` effects. Only needed for effects.
 - `videos/placeholder.mp4`: source of the placeholder clip.

@@ -12,21 +12,25 @@ and flash it.
    `python -c "import PIL; print(PIL.__version__)"` (10.1+). Help install whatever is missing:
    `pip install -r tools/requirements.txt`, and ffmpeg from ffmpeg.org or a package manager.
 
-2. **Get the video.** Ask the user to put it in `videos/`. A vertical 9:16 phone clip of about
-   3 seconds works best; hard cuts split it into scenes, and each scene gets its own crop,
-   label and effect. Probe it with `ffprobe` (size, duration, fps) and tell them what you found.
+2. **Get the video.** Ask the user to put it in `videos/`. Any video works: vertical, horizontal
+   or square, one shot or several. Hard cuts split it into scenes, and each scene gets its own
+   crop, length, label and effect. About 15 s fits in flash in total; short loops of 3–6 s look
+   best. The TRAIN/FIGHT/BUILD setup is only the example, so follow their idea, not the
+   template. Probe it with `ffprobe` (size, duration, fps) and tell them what you found.
 
 3. **First pass.** `python tools/make_video.py videos/<file> main`. Its last line reports frames,
    scene lengths, effects and size.
 
 4. **Review and tune.** Read `videos/main_preview.jpg`. For each scene, check the subject is in
-   frame (the panel is 6:7, so the 9:16 frame is cropped):
-   - `SCENE_CROP`: 0.0 keeps the top of the frame, 1.0 the bottom. One value per scene.
+   frame (the panel is 6:7, so frames are scaled to cover it and cropped):
+   - `SCENE_CROP`: where the window sits, 0.0 = top (or left on wide clips), 1.0 = bottom (or
+     right). One value per scene.
    - `SCENE_LENGTH`: seconds per scene; `None` keeps the original. Longer slows it down.
    Edit the values at the top of `tools/make_video.py`, re-run, and look again. Tell the user
    what you changed and why. To compare options, crop one frame several ways side by side.
 
-5. **Labels.** `LABELS` holds one per scene. Short uppercase words read best (`TRAIN`, `BUILD`).
+5. **Labels.** `LABELS` holds one per scene. Short uppercase words read best. `None` skips a
+   scene's label, and `LABELS = []` turns them off.
 
 6. **Effects (optional).** Per scene in `SCENE_EFFECT`: `"orbit"` (`ORBIT_TEXT` flowing around
    the person), `"sticker"` (white outline) or `None`. Both need cut-out masks:
