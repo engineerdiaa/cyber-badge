@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="390" viewBox="0 0 880 390" role="img" aria-label="Wiring diagram: TFT pins SCL, SDA, RES, DC, CS, BLK go to C3 pins 5, 6, 7, 10, 20, 21. OLED SCL and SDA go to C3 pins 4 and 3. Power pins connect to 3V3 and GND."><style>text{font-family:'JetBrains Mono',Consolas,'DejaVu Sans Mono',monospace}.d-module{fill:#E3EAF4;stroke:#1F3A63;stroke-width:1.5}.d-module-label{fill:#1F3A63;font-size:12px}.d-mcu{fill:#22262A}.d-mcu-pin{fill:#E8EBEE;font-size:12px;font-weight:600}.d-mcu-pin.unused{opacity:0.45;font-weight:400}.d-mcu-label{fill:#E8EBEE;font-size:12px}.d-metal{fill:#A9B0B7}.d-screen{fill:#0B0D10}.d-pin-label{fill:#1F3A63;font-size:12px;font-weight:600}.d-pad{fill:#B0682B}.d-note{fill:#59655E;font-size:11px}.d-wire{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.d-tag-text{fill:#FFFFFF;font-size:11px;font-weight:600}.d-lipo{fill:#A9B0B7;opacity:0.55;stroke:#59655E;stroke-width:1.2}.d-ink{fill:#16201B;font-size:12px}.s-block{fill:#FFFFFF;stroke:#16201B;stroke-width:1.5}.s-inner{fill:none;stroke:#59655E;stroke-width:1.2;stroke-dasharray:4 3}.s-line{fill:none;stroke:#16201B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.s-line-pwr{stroke:#D42A2A}.s-text{fill:#16201B;font-size:12px}.s-title{fill:#16201B;font-size:13px;font-weight:600}.s-muted{fill:#59655E;font-size:10.5px}.s-pin{fill:#16201B;font-size:11px;font-weight:600}.s-3v3{fill:#D42A2A;font-size:11px;font-weight:600}</style><rect width="100%" height="100%" fill="#ffffff"/>
+          <!-- TFT module -->
+          <rect class="d-module" x="20" y="40" width="170" height="300" rx="10"/>
+          <rect class="d-screen" x="34" y="62" width="100" height="150" rx="16"/>
+          <text class="d-module-label" x="34" y="240" font-weight="600">1.69" TFT</text>
+          <text class="d-module-label" x="34" y="257">ST7789V3</text>
+          <text class="d-module-label" x="34" y="274">240×280</text>
+          <g text-anchor="end">
+            <text class="d-pin-label" x="180" y="94">GND</text>
+            <text class="d-pin-label" x="180" y="124">VCC</text>
+            <text class="d-pin-label" x="180" y="154">SCL</text>
+            <text class="d-pin-label" x="180" y="184">SDA</text>
+            <text class="d-pin-label" x="180" y="214">RES</text>
+            <text class="d-pin-label" x="180" y="244">DC</text>
+            <text class="d-pin-label" x="180" y="274">CS</text>
+            <text class="d-pin-label" x="180" y="304">BLK</text>
+          </g>
+
+          <!-- C3 Super Mini -->
+          <rect class="d-metal" x="425" y="44" width="60" height="22" rx="7"/>
+          <rect class="d-mcu" x="380" y="60" width="150" height="280" rx="8"/>
+          <text class="d-mcu-label" x="455" y="84" text-anchor="middle" opacity="0.7">USB-C</text>
+          <text class="d-mcu-label" x="455" y="205" text-anchor="middle" font-weight="600">ESP32-C3</text>
+          <text class="d-mcu-label" x="455" y="222" text-anchor="middle">Super Mini</text>
+          <g>
+            <text class="d-mcu-pin" x="392" y="104">5</text>
+            <text class="d-mcu-pin" x="392" y="134">6</text>
+            <text class="d-mcu-pin" x="392" y="164">7</text>
+            <text class="d-mcu-pin unused" x="392" y="194">8</text>
+            <text class="d-mcu-pin unused" x="392" y="224">9</text>
+            <text class="d-mcu-pin" x="392" y="254">10</text>
+            <text class="d-mcu-pin" x="392" y="284">20</text>
+            <text class="d-mcu-pin" x="392" y="314">21</text>
+          </g>
+          <g text-anchor="end">
+            <text class="d-mcu-pin" x="518" y="104">5V</text>
+            <text class="d-mcu-pin" x="518" y="134">G</text>
+            <text class="d-mcu-pin" x="518" y="164">3.3</text>
+            <text class="d-mcu-pin" x="518" y="194">4</text>
+            <text class="d-mcu-pin" x="518" y="224">3</text>
+            <text class="d-mcu-pin unused" x="518" y="254">2</text>
+            <text class="d-mcu-pin unused" x="518" y="284">1</text>
+            <text class="d-mcu-pin unused" x="518" y="314">0</text>
+          </g>
+          <g text-anchor="end">
+            <text class="d-note" x="372" y="194">LED</text>
+            <text class="d-note" x="372" y="224">BOOT button</text>
+          </g>
+
+          <!-- OLED module -->
+          <rect class="d-module" x="700" y="230" width="170" height="140" rx="10"/>
+          <rect class="d-screen" x="744" y="250" width="120" height="64" rx="3"/>
+          <image href="data:image/png;base64,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" x="748" y="254" width="112" height="56" style="image-rendering:pixelated"/>
+          <text class="d-module-label" x="804" y="338" text-anchor="middle" font-weight="600">0.96" OLED</text>
+          <text class="d-module-label" x="804" y="355" text-anchor="middle">SSD1306 · I2C</text>
+          <g>
+            <text class="d-pin-label" x="710" y="254">VCC</text>
+            <text class="d-pin-label" x="710" y="284">GND</text>
+            <text class="d-pin-label" x="710" y="314">SCL</text>
+            <text class="d-pin-label" x="710" y="344">SDA</text>
+          </g>
+
+          <!-- TFT -> C3 signal wires -->
+          <path class="d-wire" stroke="#D97706"  d="M190 150 H250 V100 H380"/>
+          <path class="d-wire" stroke="#2563EB" d="M190 180 H275 V130 H380"/>
+          <path class="d-wire" stroke="#8B3FD9"  d="M190 210 H300 V160 H380"/>
+          <path class="d-wire" stroke="#0E8C82"   d="M190 240 H330 V250 H380"/>
+          <path class="d-wire" stroke="#D02B7C"   d="M190 270 H330 V280 H380"/>
+          <path class="d-wire" stroke="#5F8F0B"  d="M190 300 H330 V310 H380"/>
+
+          <!-- C3 -> OLED signal wires -->
+          <path class="d-wire" stroke="#E2580F" d="M530 190 H600 V310 H700"/>
+          <path class="d-wire" stroke="#0B86A8" d="M530 220 H580 V340 H700"/>
+
+          <!-- power tags -->
+          <path class="d-wire" stroke="#16201B" d="M190 90 H200"/>
+          <rect x="200" y="81" width="40" height="18" rx="4" fill="#16201B"/>
+          <text class="d-tag-text" x="220" y="94" text-anchor="middle">GND</text>
+          <path class="d-wire" stroke="#D42A2A" d="M190 120 H200"/>
+          <rect x="200" y="111" width="40" height="18" rx="4" fill="#D42A2A"/>
+          <text class="d-tag-text" x="220" y="124" text-anchor="middle">3V3</text>
+
+          <path class="d-wire" stroke="#B4590A" d="M530 100 H540"/>
+          <rect x="540" y="91" width="96" height="18" rx="4" fill="#B4590A"/>
+          <text class="d-tag-text" x="588" y="104" text-anchor="middle">from switch</text>
+          <path class="d-wire" stroke="#16201B" d="M530 130 H540"/>
+          <rect x="540" y="121" width="40" height="18" rx="4" fill="#16201B"/>
+          <text class="d-tag-text" x="560" y="134" text-anchor="middle">GND</text>
+          <path class="d-wire" stroke="#D42A2A" d="M530 160 H540"/>
+          <rect x="540" y="151" width="40" height="18" rx="4" fill="#D42A2A"/>
+          <text class="d-tag-text" x="560" y="164" text-anchor="middle">3V3</text>
+
+          <path class="d-wire" stroke="#D42A2A" d="M690 250 H700"/>
+          <rect x="650" y="241" width="40" height="18" rx="4" fill="#D42A2A"/>
+          <text class="d-tag-text" x="670" y="254" text-anchor="middle">3V3</text>
+          <path class="d-wire" stroke="#16201B" d="M690 280 H700"/>
+          <rect x="650" y="271" width="40" height="18" rx="4" fill="#16201B"/>
+          <text class="d-tag-text" x="670" y="284" text-anchor="middle">GND</text>
+
+          <!-- pads -->
+          <g class="d-pad">
+            <circle cx="190" cy="90" r="5"/><circle cx="190" cy="120" r="5"/><circle cx="190" cy="150" r="5"/><circle cx="190" cy="180" r="5"/>
+            <circle cx="190" cy="210" r="5"/><circle cx="190" cy="240" r="5"/><circle cx="190" cy="270" r="5"/><circle cx="190" cy="300" r="5"/>
+            <circle cx="380" cy="100" r="5"/><circle cx="380" cy="130" r="5"/><circle cx="380" cy="160" r="5"/><circle cx="380" cy="190" r="5"/>
+            <circle cx="380" cy="220" r="5"/><circle cx="380" cy="250" r="5"/><circle cx="380" cy="280" r="5"/><circle cx="380" cy="310" r="5"/>
+            <circle cx="530" cy="100" r="5"/><circle cx="530" cy="130" r="5"/><circle cx="530" cy="160" r="5"/><circle cx="530" cy="190" r="5"/>
+            <circle cx="530" cy="220" r="5"/><circle cx="530" cy="250" r="5"/><circle cx="530" cy="280" r="5"/><circle cx="530" cy="310" r="5"/>
+            <circle cx="700" cy="250" r="5"/><circle cx="700" cy="280" r="5"/><circle cx="700" cy="310" r="5"/><circle cx="700" cy="340" r="5"/>
+          </g>
+        </svg>

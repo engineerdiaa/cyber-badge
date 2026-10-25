@@ -1,0 +1,5 @@
+# make_video.py (also needs ffmpeg on your PATH)
+Pillow>=10.1
+
+# make_masks.py, only for the "orbit" and "sticker" effects
+rembg[cpu]>=2.0

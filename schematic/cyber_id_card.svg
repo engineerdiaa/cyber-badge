@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="545" viewBox="0 0 1000 545" role="img" aria-label="Schematic: LiPo to TP4056 B+ and B-. TP4056 OUT+ through switch SW1 to the C3 5V pin, which feeds the onboard 3.3 V regulator. The C3 3V3 pin powers TFT VCC and OLED VCC. TP4056 OUT-, C3 GND, TFT GND and OLED GND are ground. GPIO 5, 6, 7, 10, 20, 21 go to TFT SCL, SDA, RES, DC, CS, BLK. GPIO 4 and 3 go to OLED SCL and SDA."><style>text{font-family:'JetBrains Mono',Consolas,'DejaVu Sans Mono',monospace}.d-module{fill:#E3EAF4;stroke:#1F3A63;stroke-width:1.5}.d-module-label{fill:#1F3A63;font-size:12px}.d-mcu{fill:#22262A}.d-mcu-pin{fill:#E8EBEE;font-size:12px;font-weight:600}.d-mcu-pin.unused{opacity:0.45;font-weight:400}.d-mcu-label{fill:#E8EBEE;font-size:12px}.d-metal{fill:#A9B0B7}.d-screen{fill:#0B0D10}.d-pin-label{fill:#1F3A63;font-size:12px;font-weight:600}.d-pad{fill:#B0682B}.d-note{fill:#59655E;font-size:11px}.d-wire{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.d-tag-text{fill:#FFFFFF;font-size:11px;font-weight:600}.d-lipo{fill:#A9B0B7;opacity:0.55;stroke:#59655E;stroke-width:1.2}.d-ink{fill:#16201B;font-size:12px}.s-block{fill:#FFFFFF;stroke:#16201B;stroke-width:1.5}.s-inner{fill:none;stroke:#59655E;stroke-width:1.2;stroke-dasharray:4 3}.s-line{fill:none;stroke:#16201B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.s-line-pwr{stroke:#D42A2A}.s-text{fill:#16201B;font-size:12px}.s-title{fill:#16201B;font-size:13px;font-weight:600}.s-muted{fill:#59655E;font-size:10.5px}.s-pin{fill:#16201B;font-size:11px;font-weight:600}.s-3v3{fill:#D42A2A;font-size:11px;font-weight:600}</style><rect width="100%" height="100%" fill="#ffffff"/>
+          <defs>
+            <g id="sch-gnd"><path class="s-line" d="M0 0 V14 M-14 14 H14 M-9 20 H9 M-4 26 H4"/></g>
+            <g id="sch-3v3"><path class="s-line s-line-pwr" d="M0 0 V-18 M-10 -18 H10"/><text class="s-3v3" y="-24" text-anchor="middle">3V3</text></g>
+          </defs>
+
+          <!-- battery -->
+          <path class="s-line s-line-pwr" d="M60 250 V182 H180"/>
+          <path class="s-line" d="M60 262 V330 H180"/>
+          <path class="s-line" d="M40 250 H80"/>
+          <path class="s-line" style="stroke-width:5" d="M50 262 H70"/>
+          <text class="s-text" x="86" y="247" font-weight="600">+</text>
+          <text class="s-title" x="90" y="292">LiPo 3.7 V</text>
+          <text class="s-muted" x="90" y="308">600 mAh</text>
+
+          <!-- TP4056 -->
+          <text class="s-muted" x="260" y="116" text-anchor="middle">USB-C · charging</text>
+          <rect class="s-block" x="180" y="140" width="160" height="220" rx="6"/>
+          <rect class="d-metal" x="230" y="126" width="60" height="16" rx="5"/>
+          <text class="s-pin" x="188" y="186">B+</text>
+          <text class="s-pin" x="188" y="334">B−</text>
+          <text class="s-pin" x="332" y="186" text-anchor="end">OUT+</text>
+          <text class="s-pin" x="332" y="334" text-anchor="end">OUT−</text>
+          <text class="s-title" x="260" y="244" text-anchor="middle">TP4056</text>
+          <text class="s-muted" x="260" y="262" text-anchor="middle">charger +</text>
+          <text class="s-muted" x="260" y="276" text-anchor="middle">protection</text>
+          <text class="s-muted" x="260" y="300" text-anchor="middle">R3 = charge current</text>
+
+          <!-- switch on the positive side -->
+          <path class="s-line" style="stroke:#B4590A" d="M340 182 H400 L447 171"/>
+          <circle cx="400" cy="182" r="3.5" fill="#16201B"/>
+          <circle cx="452" cy="170" r="4.5" fill="#FFFFFF" stroke="#16201B" stroke-width="2"/>
+          <circle cx="452" cy="194" r="4.5" fill="#FFFFFF" stroke="#16201B" stroke-width="2"/>
+          <text class="s-title" x="426" y="152" text-anchor="middle">SW1</text>
+          <text class="s-muted" x="400" y="204" text-anchor="middle">middle</text>
+          <text class="s-muted" x="462" y="208">unused</text>
+          <path class="s-line" style="stroke:#B4590A" d="M456.5 170 H520"/>
+          <text class="s-muted" x="486" y="160" text-anchor="middle">BAT+ (on)</text>
+
+          <path class="s-line" d="M340 330 H372"/>
+          <use href="#sch-gnd" x="372" y="330"/>
+
+          <!-- C3 Super Mini -->
+          <rect class="s-block" x="520" y="120" width="180" height="340" rx="6"/>
+          <text class="s-muted" x="530" y="140" letter-spacing="0.06em">C3 SUPER MINI</text>
+          <text class="s-pin" x="527" y="163">5V</text>
+          <path class="s-inner" d="M520 170 H560 M616 170 H650 V120"/>
+          <rect class="s-inner" x="560" y="156" width="56" height="28" rx="3"/>
+          <text class="s-text" x="588" y="174" text-anchor="middle">LDO</text>
+          <text class="s-pin" x="660" y="140">3V3</text>
+          <text class="s-muted" x="528" y="204">onboard 3.3 V regulator</text>
+          <use href="#sch-3v3" x="650" y="120"/>
+          <text class="s-muted" x="666" y="104">powers both screens</text>
+          <rect class="s-inner" style="stroke-dasharray:none" x="548" y="218" width="92" height="214" rx="4"/>
+          <text class="s-title" x="594" y="318" text-anchor="middle">ESP32-C3</text>
+          <text class="s-muted" x="594" y="342" text-anchor="middle">GPIO9 =</text>
+          <text class="s-muted" x="594" y="356" text-anchor="middle">BOOT button</text>
+          <g text-anchor="end">
+            <text class="s-pin" x="692" y="214">GPIO5</text>
+            <text class="s-pin" x="692" y="239">GPIO6</text>
+            <text class="s-pin" x="692" y="264">GPIO7</text>
+            <text class="s-pin" x="692" y="289">GPIO10</text>
+            <text class="s-pin" x="692" y="314">GPIO20</text>
+            <text class="s-pin" x="692" y="339">GPIO21</text>
+            <text class="s-pin" x="692" y="414">GPIO4</text>
+            <text class="s-pin" x="692" y="439">GPIO3</text>
+          </g>
+          <text class="s-pin" x="580" y="452" text-anchor="middle">GND</text>
+          <use href="#sch-gnd" x="580" y="460"/>
+
+          <!-- TFT -->
+          <rect class="s-block" x="800" y="180" width="160" height="180" rx="6"/>
+          <text class="s-pin" x="808" y="214">SCL</text>
+          <text class="s-pin" x="808" y="239">SDA</text>
+          <text class="s-pin" x="808" y="264">RES</text>
+          <text class="s-pin" x="808" y="289">DC</text>
+          <text class="s-pin" x="808" y="314">CS</text>
+          <text class="s-pin" x="808" y="339">BLK</text>
+          <text class="s-pin" x="880" y="198" text-anchor="middle">VCC</text>
+          <text class="s-pin" x="880" y="352" text-anchor="middle">GND</text>
+          <text class="s-title" x="915" y="252" text-anchor="middle">TFT</text>
+          <text class="s-muted" x="915" y="268" text-anchor="middle">ST7789V3</text>
+          <text class="s-muted" x="915" y="282" text-anchor="middle">240×280</text>
+          <use href="#sch-3v3" x="880" y="180"/>
+          <use href="#sch-gnd" x="880" y="360"/>
+
+          <!-- OLED -->
+          <rect class="s-block" x="800" y="395" width="160" height="105" rx="6"/>
+          <text class="s-pin" x="808" y="414">SCL</text>
+          <text class="s-pin" x="808" y="439">SDA</text>
+          <text class="s-pin" x="930" y="413" text-anchor="middle">VCC</text>
+          <text class="s-pin" x="880" y="492" text-anchor="middle">GND</text>
+          <text class="s-title" x="900" y="440" text-anchor="middle">OLED</text>
+          <text class="s-muted" x="900" y="456" text-anchor="middle">SSD1306 0.96"</text>
+          <use href="#sch-3v3" x="930" y="395"/>
+          <use href="#sch-gnd" x="880" y="500"/>
+
+          <!-- signals -->
+          <path class="d-wire" stroke="#D97706"  d="M700 210 H800"/>
+          <path class="d-wire" stroke="#2563EB" d="M700 235 H800"/>
+          <path class="d-wire" stroke="#8B3FD9"  d="M700 260 H800"/>
+          <path class="d-wire" stroke="#0E8C82"   d="M700 285 H800"/>
+          <path class="d-wire" stroke="#D02B7C"   d="M700 310 H800"/>
+          <path class="d-wire" stroke="#5F8F0B"  d="M700 335 H800"/>
+          <path class="d-wire" stroke="#E2580F"  d="M700 410 H800"/>
+          <path class="d-wire" stroke="#0B86A8"  d="M700 435 H800"/>
+
+          <g class="d-pad">
+            <circle cx="180" cy="182" r="4"/><circle cx="180" cy="330" r="4"/><circle cx="340" cy="182" r="4"/><circle cx="340" cy="330" r="4"/>
+            <circle cx="520" cy="170" r="4"/><circle cx="650" cy="120" r="4"/><circle cx="580" cy="460" r="4"/>
+            <circle cx="700" cy="210" r="4"/><circle cx="700" cy="235" r="4"/><circle cx="700" cy="260" r="4"/><circle cx="700" cy="285" r="4"/>
+            <circle cx="700" cy="310" r="4"/><circle cx="700" cy="335" r="4"/><circle cx="700" cy="410" r="4"/><circle cx="700" cy="435" r="4"/>
+            <circle cx="800" cy="210" r="4"/><circle cx="800" cy="235" r="4"/><circle cx="800" cy="260" r="4"/><circle cx="800" cy="285" r="4"/>
+            <circle cx="800" cy="310" r="4"/><circle cx="800" cy="335" r="4"/><circle cx="800" cy="410" r="4"/><circle cx="800" cy="435" r="4"/>
+            <circle cx="880" cy="180" r="4"/><circle cx="880" cy="360" r="4"/><circle cx="930" cy="395" r="4"/><circle cx="880" cy="500" r="4"/>
+          </g>
+        </svg>
