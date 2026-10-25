@@ -5,9 +5,9 @@ The clip comes with built-in effects: scene labels that type themselves in (`01 
 
 <!-- TODO: add photos of the finished card (images/card_front.jpg, images/card_back.jpg) -->
 <p align="center">
-  <img src="images/teaser.webp" width="640" alt="The finished card running: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
+  <img src="images/teaser.webp" width="640" alt="Working card preview: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
   <br>
-  <sub>The finished card: the TFT loops the clip, the OLED shows the name tag with the email scrolling along the top</sub>
+  <sub>Working card preview: the TFT loops the clip, the OLED shows the name tag with the email scrolling along the top</sub>
 </p>
 
 ---
@@ -108,12 +108,14 @@ flowchart LR
 
 ## Board layout
 
-This is how the card is laid out:
+This is how the card is laid out, drawn to scale from the real board:
+
+<p align="center"><img src="images/board_layout_front.svg" width="720" alt="Front view of the 80 x 60 mm perfboard to scale: 1.69 inch TFT on the left with its 8-pin header on top, 0.96 inch OLED at the top right with its 4-pin header on top, ESP32-C3 Super Mini below the OLED, chip side up, USB-C on the right"></p>
 
 **Front**
-- The **TFT** on the left, standing upright.
-- The **OLED** at the top right.
-- The **ESP32-C3** at the bottom right, **chip side up**, with its **USB-C port at the board edge** so you can reflash it later.
+- The **TFT** on the left, standing upright, with its header at the **top**.
+- The **OLED** at the top right, header at the top as well.
+- The **ESP32-C3** below the OLED, **chip side up** and turned sideways so its **USB-C port faces the right edge**. The C3 sits up on its headers, so a cable plugs in from the side over the last few columns, and you can reflash it with everything in place.
 
 **Back**
 - All the wiring.
