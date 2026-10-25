@@ -108,14 +108,15 @@ flowchart LR
 
 ## Board layout
 
-This is how the card is laid out, drawn to scale from the real board:
+This is how the card is laid out, drawn to scale:
 
-<p align="center"><img src="images/board_layout_front.svg" width="720" alt="Front view of the 80 x 60 mm perfboard to scale: 1.69 inch TFT on the left with its 8-pin header on top, 0.96 inch OLED at the top right with its 4-pin header on top, ESP32-C3 Super Mini below the OLED, chip side up, USB-C on the right"></p>
+<p align="center"><img src="images/board_layout_front.svg" width="720" alt="Front view of the 80 x 60 mm perfboard to scale: 1.69 inch TFT on the left and 0.96 inch OLED at the top right, level with each other with both headers on the same row; ESP32-C3 Super Mini below the OLED, chip side up, USB-C on the right; one empty row of holes between the modules"></p>
 
 **Front**
 - The **TFT** on the left, standing upright, with its header at the **top**.
-- The **OLED** at the top right, header at the top as well.
+- The **OLED** at the top right, level with the TFT, so both headers sit on the same row of holes.
 - The **ESP32-C3** below the OLED, **chip side up** and turned sideways so its **USB-C port faces the right edge**. The C3 sits up on its headers, so a cable plugs in from the side over the last few columns, and you can reflash it with everything in place.
+- Leave **one empty row of holes** between the modules (a column between the TFT and the OLED, a row between the OLED and the C3), so their edges don't touch.
 
 **Back**
 - All the wiring.
@@ -237,7 +238,7 @@ Set your multimeter to resistance and measure between the TFT's **CS** and **GND
 
 ### 5. Place the modules
 
-Follow the [board layout](#board-layout): TFT left, OLED top right, C3 bottom right with its USB-C at the edge.
+Follow the [board layout](#board-layout): TFT left, OLED top right, C3 bottom right with its USB-C at the edge, and one empty row of holes between modules.
 
 ### 6. Wire the TFT, then test it
 
