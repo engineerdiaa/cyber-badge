@@ -1,6 +1,6 @@
 # Video clips converted to C arrays: generated, so keep them out of diffs and
 # out of GitHub's language stats.
-firmware/CyberID/video_*.h linguist-generated=true -diff
+firmware/CyberBadge/video_*.h linguist-generated=true -diff
 
 *.mp4 binary
 *.gif binary

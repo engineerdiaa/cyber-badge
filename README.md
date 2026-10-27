@@ -1,13 +1,13 @@
-# Cyber ID Card 🪪
+# Cyber Badge 🪪
 
-**An ID card that plays a video of you.** A 1.69" color screen loops a short clip of you, and a small OLED shows your name with your email or handle scrolling along the top. It runs on an ESP32-C3 Super Mini and a rechargeable LiPo, all on one perfboard.
+**A badge that plays a video of you.** A 1.69" color screen loops a short clip of you, and a small OLED shows your name with your email or handle scrolling along the top. It runs on an ESP32-C3 Super Mini and a rechargeable LiPo, all on one perfboard.
 The clip comes with built-in effects: scene labels that type themselves in (`01 // TRAIN`), and a word that flows around you like a halo.
 
-<!-- TODO: add photos of the finished card (images/card_front.jpg, images/card_back.jpg) -->
+<!-- TODO: add photos of the finished badge (images/badge_front.jpg, images/badge_back.jpg) -->
 <p align="center">
-  <img src="images/teaser.webp" width="640" alt="Working card preview: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
+  <img src="images/teaser.webp" width="640" alt="Working badge preview: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
   <br>
-  <sub>Working card preview: the TFT loops the clip, the OLED shows the name tag with the email scrolling along the top</sub>
+  <sub>Working badge preview: the TFT loops the clip, the OLED shows the name tag with the email scrolling along the top</sub>
 </p>
 
 ---
@@ -36,12 +36,12 @@ The clip comes with built-in effects: scene labels that type themselves in (`01 
 
 | File | What it is |
 | --- | --- |
-| [`firmware/CyberID/CyberID.ino`](firmware/CyberID/CyberID.ino) | Arduino sketch: video player, OLED name tag, BOOT button |
-| [`firmware/CyberID/video_main.h`](firmware/CyberID/video_main.h) | The clip, converted to JPEG frames in a C array. **Placeholder**, replace it with your own |
+| [`firmware/CyberBadge/CyberBadge.ino`](firmware/CyberBadge/CyberBadge.ino) | Arduino sketch: video player, OLED name tag, BOOT button |
+| [`firmware/CyberBadge/video_main.h`](firmware/CyberBadge/video_main.h) | The clip, converted to JPEG frames in a C array. **Placeholder**, replace it with your own |
 | [`tools/make_video.py`](tools/make_video.py) | Turns a phone video into that header: crop, timing, labels, effects |
 | [`tools/make_masks.py`](tools/make_masks.py) | Cuts you out of every frame (needed for the flowing-text and outline effects) |
 | [`videos/placeholder.mp4`](videos/placeholder.mp4) | The source of the placeholder clip |
-| [`schematic/cyber_id_card.pdf`](schematic/cyber_id_card.pdf), [`.svg`](schematic/cyber_id_card.svg) | Full schematic |
+| [`schematic/cyber_badge.pdf`](schematic/cyber_badge.pdf), [`.svg`](schematic/cyber_badge.svg) | Full schematic |
 | [`images/`](images/) | Wiring diagrams, OLED layout and reference photos used below |
 | [`CLAUDE.md`](CLAUDE.md), [`.claude/skills/`](.claude/skills/) | Guidance for [Claude Code](https://claude.com/claude-code), so it can walk you through adding your video and editing the code ([see below](#let-claude-code-help)) |
 | `LICENSE-*` | Licenses (see [License](#license)) |
@@ -65,7 +65,7 @@ flowchart LR
 - The **slide switch** connects the charger's output to the C3's **5V pin**. The C3's own regulator makes 3.3 V for itself and both screens.
 - The clip lives in the C3's **flash** as a stack of JPEG pictures. The C3 decodes them one after another and sends each block to the TFT with **DMA**, so the next block decodes while the last one is still going out. That gives a steady **16 fps** (measured).
 - The **OLED** shows your name and title, with your email or handle scrolling along the top strip in a background task.
-- The **BOOT button** (already on the C3) switches between clips if you add more than one. The card remembers your choice.
+- The **BOOT button** (already on the C3) switches between clips if you add more than one. The badge remembers your choice.
 
 And on your PC, before flashing:
 
@@ -74,7 +74,7 @@ flowchart LR
     MP4["your phone video"] --> MASK["make_masks.py<br/>cut-out per frame"]
     MP4 --> MV["make_video.py<br/>crop · retime · labels · effects"]
     MASK -. "only for effects" .-> MV
-    MV --> H["firmware/CyberID/video_main.h"]
+    MV --> H["firmware/CyberBadge/video_main.h"]
     H --> FLASH["upload with Arduino IDE"]
 ```
 
@@ -88,7 +88,7 @@ flowchart LR
 | 1 | 1.69" IPS TFT, **ST7789**, 240 × 280 | 8-pin header: `GND VCC SCL SDA RES DC CS BLK`. Works on 3.3 V |
 | 1 | 0.96" OLED, **SSD1306**, 128 × 64, I2C | 4-pin header: `VCC GND SCL SDA`. Yellow/blue modules give a yellow top strip; single-color ones work the same, just in one color |
 | 1 | TP4056 charger module **with protection** | The one with **6 pads** (IN+/IN−, B+/B−, **OUT+/OUT−**). The 4-pad version has no battery protection. **Read the [charging tip](#power-and-battery)** |
-| 1 | 3.7 V single-cell LiPo | The card uses a 600 mAh pouch (5 × 30 × 40 mm), which sits behind the TFT |
+| 1 | 3.7 V single-cell LiPo | The badge uses a 600 mAh pouch (5 × 30 × 40 mm), which sits behind the TFT |
 | 1 | Small SPDT slide switch | On/off |
 | 1 | 60 × 80 mm double-sided perfboard | Everything fits on one board |
 | — | Pin headers | Usually included with the screens and the C3 |
@@ -108,7 +108,7 @@ flowchart LR
 
 ## Board layout
 
-This is how the card is laid out, drawn to scale:
+This is how the badge is laid out, drawn to scale:
 
 <p align="center"><img src="images/board_layout_front.svg" width="720" alt="Front view of the 80 x 60 mm perfboard to scale: 1.69 inch TFT on the left and 0.96 inch OLED at the top right, level with each other with both headers on the same row; ESP32-C3 Super Mini below the OLED, chip side up, USB-C on the right; one empty row of holes between the modules"></p>
 
@@ -122,7 +122,7 @@ This is how the card is laid out, drawn to scale:
 - All the wiring.
 - The **TP4056** charger with **its USB-C port at an edge**, the **LiPo** behind the TFT, and the **slide switch** at an edge.
 
-Card-specific tips:
+Badge-specific tips:
 - Mount the C3 **chip side up**. That keeps its **BOOT** and **RESET** buttons reachable, and BOOT is how you switch clips.
 - **Protect the battery.** Trim every lead flush and put Kapton tape over the solder joints where the battery sits. A sharp joint can puncture a LiPo pouch. Then stick the battery down with double-sided foam tape.
 
@@ -132,9 +132,9 @@ Card-specific tips:
 
 ### Schematic
 
-<p align="center"><img src="schematic/cyber_id_card.svg" width="860" alt="Schematic: LiPo to TP4056, OUT+ through the switch to the C3 5V pin, C3 3V3 to both screens, TFT on GPIO 5 6 7 10 20 21, OLED on GPIO 4 and 3"></p>
+<p align="center"><img src="schematic/cyber_badge.svg" width="860" alt="Schematic: LiPo to TP4056, OUT+ through the switch to the C3 5V pin, C3 3V3 to both screens, TFT on GPIO 5 6 7 10 20 21, OLED on GPIO 4 and 3"></p>
 
-Every ground symbol is the C3's **G** pin and every red 3V3 flag is the C3's **3.3** pin. **B−** is not ground: only the battery's black wire goes there. A printable version is in [`schematic/cyber_id_card.pdf`](schematic/cyber_id_card.pdf).
+Every ground symbol is the C3's **G** pin and every red 3V3 flag is the C3's **3.3** pin. **B−** is not ground: only the battery's black wire goes there. A printable version is in [`schematic/cyber_badge.pdf`](schematic/cyber_badge.pdf).
 
 ### Signal wiring (C3 seen from the front)
 
@@ -273,7 +273,7 @@ On the C3, **5V**, **G** and **3.3** sit right next to each other. With the swit
 | 3.3 ↔ G | **No beep** |
 | 5V ↔ 3.3 | **No beep** |
 
-Then flip the switch on. The card should boot from the battery.
+Then flip the switch on. The badge should boot from the battery.
 
 ### 10. Finish
 
@@ -297,7 +297,7 @@ Insulate the back, stick the battery down with double-sided foam tape, and do a 
    | JPEGDEC (by Larry Bank) | 1.8.4 |
    | bb_spi_lcd (by Larry Bank) | 2.9.7, offered automatically with JPEGDEC |
 
-4. Download this repo (**Code → Download ZIP**) and open `firmware/CyberID/CyberID.ino`. Keep the `.ino` inside its `CyberID` folder, because the Arduino IDE needs the folder and file names to match.
+4. Download this repo (**Code → Download ZIP**) and open `firmware/CyberBadge/CyberBadge.ino`. Keep the `.ino` inside its `CyberBadge` folder, because the Arduino IDE needs the folder and file names to match.
 5. Set the **Tools** menu:
 
    | Setting | Value |
@@ -306,7 +306,7 @@ Insulate the back, stick the battery down with double-sided foam tape, and do a 
    | Partition Scheme | **Huge APP (3MB No OTA/1MB SPIFFS)**. The clips need it |
    | USB CDC On Boot | **Enabled** |
 
-6. **Switch the card off** (if the battery is connected), then plug the C3 into USB and click **Upload**.
+6. **Switch the badge off** (if the battery is connected), then plug the C3 into USB and click **Upload**.
    If the port doesn't show up or the upload fails: hold **BOOT**, tap **RESET**, let go of BOOT, and upload again. Press **RESET** afterwards.
 
 The **Serial Monitor** (115200 baud) prints a line every 5 seconds, for example `[main] 16.0 fps, slowest frame 61 ms (DMA)`.
@@ -319,7 +319,7 @@ Every placeholder is marked `TODO`. Search the repo for it to find them all.
 
 ### Your name, title and email
 
-At the top of [`CyberID.ino`](firmware/CyberID/CyberID.ino):
+At the top of [`CyberBadge.ino`](firmware/CyberBadge/CyberBadge.ino):
 
 ```cpp
 const char *EMAIL = "you@example.com";  // scrolls along the top strip
@@ -340,11 +340,11 @@ pip install -r tools/requirements.txt
 python tools/make_video.py videos/my_clip.mp4 main
 ```
 
-That replaces `firmware/CyberID/video_main.h` and writes `videos/main_preview.jpg`, a contact sheet of every frame. Check it, then upload.
+That replaces `firmware/CyberBadge/video_main.h` and writes `videos/main_preview.jpg`, a contact sheet of every frame. Check it, then upload.
 
 - **Any shape:** vertical, horizontal or square. The screen is 6:7, so each frame is scaled to cover it and cropped to fit. `SCENE_CROP` picks where the window sits: `0.0` is the top (or left, for wide clips) and `1.0` the bottom (or right).
 - **Any number of shots:** one continuous shot or many. Hard cuts are detected automatically, and each shot becomes a **scene** with its own crop, length, label and effect.
-- **Length:** about 15 seconds of video fits in total, at 16 fps. Short loops of 3 to 6 seconds look best on a card.
+- **Length:** about 15 seconds of video fits in total, at 16 fps. Short loops of 3 to 6 seconds look best on a badge.
 - The tools need **ffmpeg** on your PATH.
 
 ### Effects
@@ -379,19 +379,19 @@ The **BOOT** button then cycles through them. A 3-second clip takes about 0.5 MB
 
 ### Let Claude Code help
 
-This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code](https://claude.com/claude-code). Open the folder in Claude Code and just ask, for example "help me put my video on the card", or run them directly:
+This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code](https://claude.com/claude-code). Open the folder in Claude Code and just ask, for example "help me put my video on the badge", or run them directly:
 
 | Skill | What it does |
 | --- | --- |
 | `/add-video` | Converts your clip, checks the crop and effects on the preview with you, and tunes the settings |
 | `/personalize` | Puts your name, title and email on the OLED and changes the words in the video |
-| `/flash-card` | Compiles, uploads and checks the frame rate over serial |
+| `/flash-badge` | Compiles, uploads and checks the frame rate over serial |
 
 ---
 
 ## Settings you can change
 
-### Firmware ([`CyberID.ino`](firmware/CyberID/CyberID.ino))
+### Firmware ([`CyberBadge.ino`](firmware/CyberBadge/CyberBadge.ino))
 
 | Setting | Default | What it does |
 | --- | --- | --- |
@@ -407,12 +407,12 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 | Setting | Default | What it does |
 | --- | --- | --- |
 | `SCENE_CROP` | `[0.5]` | Crop position per scene: 0 = top/left, 1 = bottom/right. The last value repeats for later scenes |
-| `SCENE_LENGTH` | `[None]` | Seconds per scene on the card. `None` keeps the original length; longer slows it down |
+| `SCENE_LENGTH` | `[None]` | Seconds per scene on the badge. `None` keeps the original length; longer slows it down |
 | `SCENE_EFFECT` | `["orbit", None, None]` | `"orbit"`, `"sticker"` or `None`, per scene |
 | `LABELS` | `TRAIN`, `FIGHT`, `BUILD` | One label per scene. `None` skips a scene, `[]` turns labels off |
 | `ORBIT_TEXT` | `"aura"` | The word that flows around you |
 | `ORBIT_SPACING`, `ORBIT_SPEED` | 14 px, 7 px/frame | Gap between the words, and how fast they move |
-| `FPS` | `16` | Frames per second on the card. The C3 manages about 17–18, so 16 shows every frame |
+| `FPS` | `16` | Frames per second on the badge. The C3 manages about 17–18, so 16 shows every frame |
 | `QUALITY` | `70` | JPEG quality. Higher is sharper, but bigger and slower to decode |
 | `FONT_FILE`, `ORBIT_FONT_FILE` | Agency FB, Segoe UI | Fonts for the labels and the orbit text (Windows paths). Point them at any `.ttf` on macOS or Linux |
 
@@ -422,7 +422,7 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 
 ### The big ones
 
-- 🔌 **Switch the card off before plugging USB into the C3.** With the switch on, the USB 5V and the battery meet at the 5V pin.
+- 🔌 **Switch the badge off before plugging USB into the C3.** With the switch on, the USB 5V and the battery meet at the 5V pin.
 - 🔋 **Lower the TP4056 charge current for small batteries.** ([details](#power-and-battery))
 - 🔄 **Remember the mirror.** The C3's labels are on the back. Mark the 5V pin before soldering.
 - 🧪 **Measure the TFT's CS pin before wiring it.** ([step 4](#4-check-the-tfts-cs-pin))
@@ -432,18 +432,18 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 ### Power and battery
 
 - Charge through the **TP4056's USB-C port**. The C3's USB port does **not** charge the battery.
-- Charge with the switch **off**. If the card is running while charging, the TP4056 may never see the battery as full.
+- Charge with the switch **off**. If the badge is running while charging, the TP4056 may never see the battery as full.
 - The TP4056 charges at **1 A** by default, set by its R_PROG resistor (usually **R3**, `122` = 1.2 kΩ). A safe rule is to keep the charge current **at or below the battery's capacity**:
 
   | Battery | R_PROG | Charge current |
   | --- | --- | --- |
   | ~1000 mAh or more | 1.2 kΩ (default) | ~1 A |
-  | ~600 mAh (the card's) | 2 kΩ | ~580 mA |
+  | ~600 mAh (the badge's) | 2 kΩ | ~580 mA |
   | ~500 mAh | 2.4 kΩ | ~500 mA |
   | ~300 mAh | 4 kΩ | ~300 mA |
 
   R3 is tiny. You don't need SMD parts to change it: melt a blob of solder across it so it slides off, then solder an ordinary through-hole resistor across the two pads. To see what your module really draws, put your multimeter (10 A jack) in line with the battery's red wire while charging.
-- The card switches itself off when the battery gets down to about 3.2 V, because the C3's regulator can't hold 3.3 V any lower. Recharge it then, rather than leaving it flat.
+- The badge switches itself off when the battery gets down to about 3.2 V, because the C3's regulator can't hold 3.3 V any lower. Recharge it then, rather than leaving it flat.
 - Rough battery life on a 600 mAh cell is **6–10 hours** at full brightness. That's an estimate, not a measurement. Lower `BACKLIGHT` for more.
 - When you strip or cut the battery leads, **do one wire at a time** so they never touch.
 
@@ -467,9 +467,9 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 | TFT dim or unreliable | Move the TFT's VCC from 3.3 to the C3's 5V pin. The module has its own regulator and is rated for 3.3–5 V |
 | OLED blank, Serial says `OLED not found` | SDA and SCL swapped (pins 3 and 4), or VCC/GND not connected |
 | OLED is all one color, no yellow strip | You have a single-color module. The yellow strip is printed into two-color screens, so the code can't change it |
-| Upload fails or no port | Hold BOOT, tap RESET, let go of BOOT, upload again. Use a USB **data** cable. Switch the card off first |
+| Upload fails or no port | Hold BOOT, tap RESET, let go of BOOT, upload again. Use a USB **data** cable. Switch the badge off first |
 | Video slower than 16 fps | Check the Serial Monitor. Very detailed clips decode slower: try a lower `QUALITY` |
-| TP4056 never shows "full" | Switch the card **off** while charging |
+| TP4056 never shows "full" | Switch the badge **off** while charging |
 
 ---
 

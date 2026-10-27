@@ -1,16 +1,16 @@
-# Cyber ID Card: notes for Claude Code
+# Cyber Badge: notes for Claude Code
 
-An ID card built on an ESP32-C3 Super Mini: a 1.69" ST7789 TFT loops a short video from flash,
+A badge built on an ESP32-C3 Super Mini: a 1.69" ST7789 TFT loops a short video from flash,
 a 0.96" SSD1306 OLED shows a name tag. Most people who open this repo want to put in their own
 name and video, then build and flash it. The skills in `.claude/skills/` walk through those
-(`add-video`, `personalize`, `flash-card`). `README.md` is the build guide; point people to the
+(`add-video`, `personalize`, `flash-badge`). `README.md` is the build guide; point people to the
 right section of it instead of repeating it.
 
 ## Layout
 
-- `firmware/CyberID/CyberID.ino`: the sketch. Placeholders are marked `TODO` (`EMAIL`, `NAME`,
+- `firmware/CyberBadge/CyberBadge.ino`: the sketch. Placeholders are marked `TODO` (`EMAIL`, `NAME`,
   `TITLE`, the video include).
-- `firmware/CyberID/video_<name>.h`: generated clips. Never edit by hand; regenerate with
+- `firmware/CyberBadge/video_<name>.h`: generated clips. Never edit by hand; regenerate with
   `tools/make_video.py`.
 - `tools/make_video.py`: any video → header. Tall, wide or square clips all work (frames are
   scaled to cover 240×280 and cropped). Per-scene settings at the top (`SCENE_CROP`,
@@ -26,13 +26,13 @@ right section of it instead of repeating it.
 - FQBN: `esp32:esp32:nologo_esp32c3_super_mini:PartitionScheme=huge_app,CDCOnBoot=cdc`
   (esp32 core 3.x).
 - Libraries: Adafruit GFX, Adafruit SSD1306, Adafruit ST7735 and ST7789, JPEGDEC, bb_spi_lcd.
-- `arduino-cli compile --fqbn <FQBN> firmware/CyberID`, then
-  `arduino-cli upload -p <port> --fqbn <FQBN> firmware/CyberID`.
+- `arduino-cli compile --fqbn <FQBN> firmware/CyberBadge`, then
+  `arduino-cli upload -p <port> --fqbn <FQBN> firmware/CyberBadge`.
 - Serial: `arduino-cli monitor -p <port> -c baudrate=115200,dtr=off,rts=off`. Keep DTR/RTS off
   so opening the port doesn't reset the chip. Every 5 s it prints
   `[main] 16.0 fps, slowest frame 61 ms (DMA)`, and `OLED not found` once at boot if the OLED
   isn't detected.
-- Ask before uploading to someone's board, and remind them to switch the card off before
+- Ask before uploading to someone's board, and remind them to switch the badge off before
   plugging USB into the C3 when the battery is connected (USB 5V and the battery meet at the
   5V pin).
 

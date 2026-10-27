@@ -5,7 +5,7 @@ panel and cropped to fit.
     python tools/make_video.py videos/my_clip.mp4 main
     python tools/make_video.py videos/my_other_clip.mp4 alt --masks main
 
-Writes firmware/CyberID/video_<name>.h and videos/<name>_preview.jpg (a contact
+Writes firmware/CyberBadge/video_<name>.h and videos/<name>_preview.jpg (a contact
 sheet so you can check the result before flashing). If videos/masks/<masks>/
 exists (made once by tools/make_masks.py), the per-scene effects in SCENE_EFFECT
 can use it: text flowing around the person, or a sticker outline.
@@ -32,7 +32,7 @@ QUALITY = 70             # JPEG quality; higher = sharper but bigger and slower
 # On tall clips the window slides up/down (0.0 = top, 1.0 = bottom), on wide
 # clips left/right (0.0 = left, 1.0 = right).
 SCENE_CROP = [0.5]
-SCENE_LENGTH = [None]  # seconds on the card; None = original length, longer = slowed down
+SCENE_LENGTH = [None]  # seconds on the badge; None = original length, longer = slowed down
 # Per scene: "orbit" = ORBIT_TEXT flowing around you, "sticker" = white outline, None = nothing.
 SCENE_EFFECT = ["orbit", None, None]
 LABELS = ["TRAIN", "FIGHT", "BUILD"]  # None skips a scene's label; [] turns labels off
@@ -329,7 +329,7 @@ def main():
         f.save(buf, "JPEG", quality=QUALITY, optimize=True, subsampling=2)
         jpegs.append(buf.getvalue())
 
-    header = ROOT / "firmware" / "CyberID" / f"video_{args.name}.h"
+    header = ROOT / "firmware" / "CyberBadge" / f"video_{args.name}.h"
     size = write_header(args.name, jpegs, header)
     preview = ROOT / "videos" / f"{args.name}_preview.jpg"
     write_preview(out, preview)

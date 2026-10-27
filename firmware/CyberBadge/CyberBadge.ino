@@ -1,4 +1,4 @@
-// Cyber ID card - ESP32-C3 Super Mini
+// Cyber Badge - ESP32-C3 Super Mini
 //
 // TFT  (1.69" ST7789, 240x280): loops a video stored in flash as JPEG frames,
 //      sent over SPI with DMA while the next block decodes.
@@ -246,7 +246,7 @@ void setup() {
     Serial.println("OLED not found - check SDA/SCL wiring");
   }
 
-  prefs.begin("cyberid");
+  prefs.begin("cyberbadge");
   current = prefs.getUChar("clip", 0) % VIDEO_COUNT;  // last clip picked with BOOT
   videoStart = millis();
 }
