@@ -1,6 +1,6 @@
 ---
-name: flash-card
-description: Compile the Cyber ID card firmware, upload it to the ESP32-C3 Super Mini, and check the frame rate over serial. Use when someone wants to build, flash, upload or test the card.
+name: flash-badge
+description: Compile the Cyber Badge firmware, upload it to the ESP32-C3 Super Mini, and check the frame rate over serial. Use when someone wants to build, flash, upload or test the badge.
 ---
 
 # Build and flash
@@ -21,15 +21,15 @@ FQBN: `esp32:esp32:nologo_esp32c3_super_mini:PartitionScheme=huge_app,CDCOnBoot=
    ```
    bb_spi_lcd is installed along with JPEGDEC.
 
-3. **Compile:** `arduino-cli compile --fqbn <FQBN> firmware/CyberID`. Report the size line. If it
+3. **Compile:** `arduino-cli compile --fqbn <FQBN> firmware/CyberBadge`. Report the size line. If it
    says the sketch is too big, the partition scheme isn't Huge APP or there are too many clips.
 
 4. **Find the port:** `arduino-cli board list`. The C3 shows up as a USB serial port from
    Espressif (VID 303A).
 
-5. **Upload.** Ask the user first, and if the battery is connected, have them switch the card
+5. **Upload.** Ask the user first, and if the battery is connected, have them switch the badge
    off before plugging in USB. Then
-   `arduino-cli upload -p <port> --fqbn <FQBN> firmware/CyberID`.
+   `arduino-cli upload -p <port> --fqbn <FQBN> firmware/CyberBadge`.
    If the port doesn't show or the upload fails: hold BOOT, tap RESET, release BOOT, retry.
 
 6. **Check it.** `arduino-cli monitor -p <port> -c baudrate=115200,dtr=off,rts=off` for about

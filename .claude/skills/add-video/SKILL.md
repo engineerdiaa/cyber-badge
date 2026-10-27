@@ -1,11 +1,11 @@
 ---
 name: add-video
-description: Replace the Cyber ID card's placeholder clip with the user's own video, tune the crop and timing per scene, add labels and effects, and get it onto the card. Use when someone wants their own video, clip or face on the card's screen.
+description: Replace the Cyber Badge's placeholder clip with the user's own video, tune the crop and timing per scene, add labels and effects, and get it onto the badge. Use when someone wants their own video, clip or face on the badge's screen.
 ---
 
 # Add your own video
 
-Goal: turn the user's phone video into `firmware/CyberID/video_main.h`, check it looks right,
+Goal: turn the user's phone video into `firmware/CyberBadge/video_main.h`, check it looks right,
 and flash it.
 
 1. **Check the tools.** `python --version` (3.10+), `ffmpeg -version`, and
@@ -47,7 +47,7 @@ and flash it.
    For more clips: `make_video.py videos/<file> <name>`, then `#include "video_<name>.h"` and
    add `&<name>_video` to `VIDEOS[]` in the sketch. The BOOT button cycles through them.
 
-8. **Build and flash** with the `flash-card` skill. Then read the serial stats: about 16 fps with
+8. **Build and flash** with the `flash-badge` skill. Then read the serial stats: about 16 fps with
    "slowest frame" under ~70 ms. If it's slower, lower `QUALITY` or simplify the effects.
 
 Their video is personal: the `.mp4` in `videos/` isn't gitignored, so mention it before they
