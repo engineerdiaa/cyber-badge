@@ -45,7 +45,8 @@ and flash it.
 
 7. **Size.** A 3 s clip is about 0.4–0.6 MB and the app partition is 3 MB, so 3–4 clips fit.
    For more clips: `make_video.py videos/<file> <name>`, then `#include "video_<name>.h"` and
-   add `&<name>_video` to `VIDEOS[]` in the sketch. The BOOT button cycles through them.
+   add `&<name>_video` to `VIDEOS[]` in the sketch. The BOOT button cycles through them while the
+   video plays (while the balls show, it changes their colours instead).
 
 8. **Build and flash** with the `flash-badge` skill. Then read the serial stats: about 16 fps with
    "slowest frame" under ~70 ms. If it's slower, lower `QUALITY` or simplify the effects.

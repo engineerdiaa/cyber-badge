@@ -2,6 +2,7 @@
 
 **A badge that plays a video of you.** A 1.69" color screen loops a short clip of you, and a small OLED shows your name with your email or handle scrolling along the top. It runs on an ESP32-C3 Super Mini and a rechargeable LiPo, all on one perfboard.
 The clip comes with built-in effects: scene labels that type themselves in (`01 // TRAIN`), and a word that flows around you like a halo.
+Add the optional motion sensor and a shake turns the screen into a pool of balls that flows like water as you move, in layers of color: fire, ocean or jungle.
 
 <!-- TODO: add photos of the finished badge (images/badge_front.jpg, images/badge_back.jpg) -->
 <p align="center">
@@ -36,14 +37,16 @@ The clip comes with built-in effects: scene labels that type themselves in (`01 
 
 | File | What it is |
 | --- | --- |
-| [`firmware/CyberBadge/CyberBadge.ino`](firmware/CyberBadge/CyberBadge.ino) | Arduino sketch: video player, OLED name tag, BOOT button |
+| [`firmware/CyberBadge/CyberBadge.ino`](firmware/CyberBadge/CyberBadge.ino) | Arduino sketch: video player, OLED name tag, BOOT button, switching to the balls and back |
+| [`firmware/CyberBadge/dots.cpp`](firmware/CyberBadge/dots.cpp), [`dots.h`](firmware/CyberBadge/dots.h) | The balls: water physics, colors and drawing |
+| [`firmware/CyberBadge/imu.cpp`](firmware/CyberBadge/imu.cpp), [`imu.h`](firmware/CyberBadge/imu.h) | The motion sensor: the shake that wakes the balls, which way is down, lying on a table |
 | [`firmware/CyberBadge/video_main.h`](firmware/CyberBadge/video_main.h) | The clip, converted to JPEG frames in a C array. **Placeholder**, replace it with your own |
 | [`tools/make_video.py`](tools/make_video.py) | Turns a phone video into that header: crop, timing, labels, effects |
 | [`tools/make_masks.py`](tools/make_masks.py) | Cuts you out of every frame (needed for the flowing-text and outline effects) |
 | [`videos/placeholder.mp4`](videos/placeholder.mp4) | The source of the placeholder clip |
 | [`schematic/cyber_badge.pdf`](schematic/cyber_badge.pdf), [`.svg`](schematic/cyber_badge.svg) | Full schematic |
 | [`images/`](images/) | Wiring diagrams, OLED layout and reference photos used below |
-| [`CLAUDE.md`](CLAUDE.md), [`.claude/skills/`](.claude/skills/) | Guidance for [Claude Code](https://claude.com/claude-code), so it can walk you through adding your video and editing the code ([see below](#let-claude-code-help)) |
+| [`AGENTS.md`](AGENTS.md), [`CLAUDE.md`](CLAUDE.md), [`.claude/skills/`](.claude/skills/), [`.agents/skills/`](.agents/skills/) | Guidance for [Claude Code](https://claude.com/claude-code) and Codex, so they can walk you through adding your video and editing the code ([see below](#let-claude-code-help)) |
 | `LICENSE-*` | Licenses (see [License](#license)) |
 
 ---
@@ -58,14 +61,17 @@ flowchart LR
     SW -- "5V pin" --> C3["ESP32-C3 Super Mini<br/>onboard 3.3 V regulator"]
     C3 -- "SPI + DMA" --> TFT["1.69'' TFT<br/>ST7789, 240 × 280"]
     C3 -- "I2C" --> OLED["0.96'' OLED<br/>SSD1306, 128 × 64"]
+    IMU["LSM6DS3 motion sensor<br/>optional"] -- "I2C, same two wires" --> C3
     BOOT["BOOT button"] --> C3
 ```
 
 - The **TP4056** charges the LiPo over USB-C and protects it from over-charge, over-discharge and shorts.
-- The **slide switch** connects the charger's output to the C3's **5V pin**. The C3's own regulator makes 3.3 V for itself and both screens.
+- The **slide switch** connects the charger's output to the C3's **5V pin**. The C3's own regulator makes 3.3 V for itself, both screens and the motion sensor.
 - The clip lives in the C3's **flash** as a stack of JPEG pictures. The C3 decodes them one after another and sends each block to the TFT with **DMA**, so the next block decodes while the last one is still going out. That gives a steady **16 fps** (measured).
 - The **OLED** shows your name and title, with your email or handle scrolling along the top strip in a background task.
-- The **BOOT button** (already on the C3) switches between clips if you add more than one. The badge remembers your choice.
+- The **motion sensor** (optional) shares the OLED's two I2C wires. **Shake the badge back and forth** and the TFT switches from the video to a pool of balls that sloshes like water with every move and tilt. Once the balls have been still for 3 seconds, the video comes back. Lying still on a table, they sink to the bottom edge as if the badge stood upright. Without the sensor, the badge just plays the video.
+- The balls come in **layers of color**, light at the surface and dark along the edge they rest on: **fire**, **ocean** or **jungle**. A shake stirs the colors, and they settle back into layers about 1.5 seconds after the balls stop.
+- The **BOOT button** (already on the C3) switches between clips if you add more than one. While the balls show, it drops a fresh pool in the next colors in from the top. The badge remembers both choices.
 
 And on your PC, before flashing:
 
@@ -87,6 +93,7 @@ flowchart LR
 | 1 | ESP32-C3 **Super Mini** | The tiny one with USB-C. Pin labels are printed on the **back** ([see below](#esp32-c3-super-mini-labels-are-on-the-back)) |
 | 1 | 1.69" IPS TFT, **ST7789**, 240 × 280 | 8-pin header: `GND VCC SCL SDA RES DC CS BLK`. Works on 3.3 V |
 | 1 | 0.96" OLED, **SSD1306**, 128 × 64, I2C | 4-pin header: `VCC GND SCL SDA`. Yellow/blue modules give a yellow top strip; single-color ones work the same, just in one color |
+| 1 | LSM6DS3 motion sensor module, I2C | **Optional**, for the balls. Modules with the LSM6DS3TR-C work the same. Without one, the badge just plays the video |
 | 1 | TP4056 charger module **with protection** | The one with **6 pads** (IN+/IN−, B+/B−, **OUT+/OUT−**). The 4-pad version has no battery protection. **Read the [charging tip](#power-and-battery)** |
 | 1 | 3.7 V single-cell LiPo | The badge uses a 600 mAh pouch (5 × 30 × 40 mm), which sits behind the TFT |
 | 1 | Small SPDT slide switch | On/off |
@@ -97,7 +104,7 @@ flowchart LR
 ## Tools
 
 - Soldering iron + solder
-- **Multimeter**: for the [CS check](#4-check-the-tfts-cs-pin), the [continuity checks](#9-check-for-shorts-before-the-first-power-up) and checking the charger's R3. Don't skip it.
+- **Multimeter**: for the [CS check](#4-check-the-tfts-cs-pin), the [continuity checks](#10-check-for-shorts-before-the-first-power-up) and checking the charger's R3. Don't skip it.
 - Flush cutters and wire strippers
 - Tweezers
 - Kapton or electrical tape, and double-sided foam tape for the battery
@@ -121,9 +128,10 @@ This is how the badge is laid out, drawn to scale:
 **Back**
 - All the wiring.
 - The **TP4056** charger with **its USB-C port at an edge**, the **LiPo** behind the TFT, and the **slide switch** at an edge.
+- The **motion sensor** (optional) on its header, **chip facing out**, square to the board's edges, with its **y axis pointing at the top edge** (look for the x and y arrows on the module). Keep it away from the TP4056, which gets warm while charging.
 
 Badge-specific tips:
-- Mount the C3 **chip side up**. That keeps its **BOOT** and **RESET** buttons reachable, and BOOT is how you switch clips.
+- Mount the C3 **chip side up**. That keeps its **BOOT** and **RESET** buttons reachable, and BOOT is how you switch clips and colors.
 - **Protect the battery.** Trim every lead flush and put Kapton tape over the solder joints where the battery sits. A sharp joint can puncture a LiPo pouch. Then stick the battery down with double-sided foam tape.
 
 ---
@@ -132,7 +140,7 @@ Badge-specific tips:
 
 ### Schematic
 
-<p align="center"><img src="schematic/cyber_badge.svg" width="860" alt="Schematic: LiPo to TP4056, OUT+ through the switch to the C3 5V pin, C3 3V3 to both screens, TFT on GPIO 5 6 7 10 20 21, OLED on GPIO 4 and 3"></p>
+<p align="center"><img src="schematic/cyber_badge.svg" width="860" alt="Schematic: LiPo to TP4056, OUT+ through the switch to the C3 5V pin, C3 3V3 to both screens and the motion sensor, TFT on GPIO 5 6 7 10 20 21, OLED and motion sensor sharing GPIO 4 and 3, sensor INT1 on GPIO 0"></p>
 
 Every ground symbol is the C3's **G** pin and every red 3V3 flag is the C3's **3.3** pin. **B−** is not ground: only the battery's black wire goes there. A printable version is in [`schematic/cyber_badge.pdf`](schematic/cyber_badge.pdf).
 
@@ -141,6 +149,7 @@ Every ground symbol is the C3's **G** pin and every red 3V3 flag is the C3's **3
 <p align="center"><img src="images/wiring_signals.svg" width="820" alt="Signal wiring: TFT pins to C3 GPIO 5, 6, 7, 10, 20, 21 in header order; OLED SCL to GPIO 4 and SDA to GPIO 3"></p>
 
 The TFT pins run down the C3's left column **in the same order as the TFT header**, so none of the wires cross. GPIO 8 (onboard LED) and 9 (BOOT button) are skipped on purpose.
+The optional motion sensor isn't drawn here: it shares the OLED's SCL and SDA wires, and its connections are in [its table](#motion-sensor-optional) and the [schematic](#schematic).
 
 ### Power path
 
@@ -187,6 +196,21 @@ The back of the TFT has a resistor marked **CS LOW**. It should be a pull-down t
 | SCL | 4 |
 | SDA | 3 |
 
+### Motion sensor (optional)
+
+| Sensor pin | Connect to | What it is |
+| --- | --- | --- |
+| VIN | C3 3.3 | Power in |
+| GND | C3 G | Ground |
+| SCL | C3 4, with the OLED's SCL | I2C clock |
+| SDA | C3 3, with the OLED's SDA | I2C data |
+| CS | 3V3 on the sensor, with a short jumper | Held high, it picks I2C over SPI |
+| SA0 | GND on the sensor | Sets the I2C address |
+| INT1 | C3 0 | Optional. The firmware doesn't use it yet |
+| OCS, INT2, SCX, SDX | — | Leave empty |
+
+This is for a 12-pin module with both a VIN and a 3V3 pin, like the one on the badge. On other modules the idea is the same: power, ground and the two I2C wires, CS to 3.3 V if it has one, and SA0 (sometimes labelled SDO or DO) to GND or 3.3 V. The firmware looks for the sensor at both addresses.
+
 ### Power section
 
 | From | To |
@@ -199,7 +223,7 @@ The back of the TFT has a resistor marked **CS LOW**. It should be a pull-down t
 
 The other outer pin of the slide switch isn't used, and the two pads beside the TP4056's USB-C port (**IN+ / IN−**) stay empty.
 
-Three wires end on the C3's **G** pin and two on **3.3**. Run a short bare-wire strip for each on the back of the board and connect to that, rather than cramming wires into one hole.
+Three wires end on the C3's **G** pin and two on **3.3**, or four and three with the motion sensor. Run a short bare-wire strip for each on the back of the board and connect to that, rather than cramming wires into one hole. The sensor's SCL and SDA can join the OLED's wires anywhere along them.
 
 ---
 
@@ -252,7 +276,17 @@ This is the back of the board at this point, with both screens wired and the pow
 
 <p align="center"><img src="images/board_wiring_back.jpg" width="640" alt="Back of the 60 x 80 mm perfboard with the TFT and OLED wired, before the battery circuit. Color-coded outlines: TFT in blue on the right with its 8-pin header, OLED in yellow at top left with its 4-pin header, ESP32-C3 in purple at bottom left with two rows of 8 pins"></p>
 
-### 8. Wire the power section
+### 8. Add the motion sensor (optional)
+
+Skip this step for a badge that just plays the video.
+
+1. If the sensor's pin labels are on the side without the chip, take a photo of them first: that side ends up facing the board.
+2. Solder its header so the **chip faces away from the board**, using the perfboard as a jig ([step 3](#3-solder-the-headers-using-the-perfboard-as-a-jig)).
+3. Place it on the back as in the [board layout](#board-layout): square to the edges, with its **y axis pointing at the top edge**, away from the TP4056.
+4. Wire it from the [table](#motion-sensor-optional), with two short jumpers on the sensor itself: **CS to 3V3** and **SA0 to GND**.
+5. Press **RESET**. The badge now starts with the balls, and the video comes back once they've been still for 3 seconds. Shake it there, back and there again, and the balls are back.
+
+### 9. Wire the power section
 
 Unplug USB first. Follow the [power table](#power-section):
 
@@ -263,7 +297,7 @@ Unplug USB first. Follow the [power table](#power-section):
 > [!CAUTION]
 > **Never connect the battery to the C3's 3.3 pin.** A full LiPo is 4.2 V and the C3 and screens are rated for about 3.6 V. The 5V pin goes through the C3's regulator; the 3.3 pin doesn't.
 
-### 9. Check for shorts before the first power-up
+### 10. Check for shorts before the first power-up
 
 On the C3, **5V**, **G** and **3.3** sit right next to each other. With the switch **off**, put your multimeter on continuity and check:
 
@@ -275,7 +309,7 @@ On the C3, **5V**, **G** and **3.3** sit right next to each other. With the swit
 
 Then flip the switch on. The badge should boot from the battery.
 
-### 10. Finish
+### 11. Finish
 
 Insulate the back, stick the battery down with double-sided foam tape, and do a full charge with the switch **off**.
 
@@ -309,7 +343,7 @@ Insulate the back, stick the battery down with double-sided foam tape, and do a 
 6. **Switch the badge off** (if the battery is connected), then plug the C3 into USB and click **Upload**.
    If the port doesn't show up or the upload fails: hold **BOOT**, tap **RESET**, let go of BOOT, and upload again. Press **RESET** afterwards.
 
-The **Serial Monitor** (115200 baud) prints a line every 5 seconds, for example `[main] 16.0 fps, slowest frame 61 ms (DMA)`.
+The **Serial Monitor** (115200 baud) prints a line every 5 seconds, for example `[main] 16.0 fps, slowest frame 61 ms (DMA)`. While the balls show, it's `[dots] 43.6 fps, physics 49% of the CPU, running at 100% of real time` instead, and each BOOT press prints the new colors' name, like `[dots] ocean`. Without a motion sensor, it says `Sensor not found - video only` once at power-on.
 
 ---
 
@@ -377,9 +411,21 @@ const Video *VIDEOS[] = {&main_video, &alt_video};
 
 The **BOOT** button then cycles through them. A 3-second clip takes about 0.5 MB of flash, so 3 to 4 clips fit.
 
+### The balls' colors
+
+The palettes are in [`dots.cpp`](firmware/CyberBadge/dots.cpp) (search for `PALETTES`), one line each:
+
+```cpp
+{"fire", {{290, 225, 70}, {285, 135, 15}, {225, 45, 5}, {105, 5, 4}}, {110, 100, 70}},  // gold to dark red
+```
+
+That's a name, four red-green-blue colors from the surface of the pool down to the floor, blended over 16 shades, and the color of the glint. A value above 255 saturates most of the ball, which is what makes jungle's top layer glow neon. Add a line and BOOT cycles through it too.
+
+`MIXING = false` in [`dots.h`](firmware/CyberBadge/dots.h) colors each ball by where it is at every moment, so the layers never mix, even mid-shake.
+
 ### Let Claude Code help
 
-This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code](https://claude.com/claude-code). Open the folder in Claude Code and just ask, for example "help me put my video on the badge", or run them directly:
+This repo includes a playbook, [`AGENTS.md`](AGENTS.md) (which `CLAUDE.md` loads), and three skills for [Claude Code](https://claude.com/claude-code). Codex reads the same playbook and has its own copy of the skills in `.agents/skills/`. Open the folder in Claude Code and just ask, for example "help me put my video on the badge", or run them directly:
 
 | Skill | What it does |
 | --- | --- |
@@ -401,6 +447,18 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 | `TFT_USE_DMA` | `true` | `false` falls back to a simpler driver without DMA (about 14 fps). Use it if the picture looks wrong |
 | `TFT_SPI_HZ` | 40 MHz | Lower to 26 MHz if you see streaks with long wires |
 | `MARQUEE_STEP_MS`, `MARQUEE_STEP_PX` | 40 ms, 2 px | OLED scroll speed |
+| `IDLE_MS` | 3000 ms | How long the balls must be still before the video comes back |
+
+### Balls and motion sensor ([`dots.h`](firmware/CyberBadge/dots.h), [`imu.h`](firmware/CyberBadge/imu.h))
+
+| Setting | Default | What it does |
+| --- | --- | --- |
+| `COUNT` | `300` | How many balls. More fill more of the screen but cost more CPU: keep the `[dots]` line at 100% of real time |
+| `MIXING` | `true` | `false` keeps the colors in layers even mid-shake ([more](#the-balls-colors)) |
+| `SETTLE_S` | 0.5 s | How quickly stirred colors settle back into layers: most of the way in three times this |
+| `SWING_G` | 0.35 g | How hard each swing of the wake-up shake has to be |
+| `WAKE_SWINGS` | `3` | Swings in a row, each the other way, that bring up the balls. Picking the badge up makes two |
+| `MOUNT` | Chip to the back, y axis up | How the sensor sits on the board. Change it if the balls fall the wrong way |
 
 ### Converter ([`make_video.py`](tools/make_video.py))
 
@@ -427,7 +485,7 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 - 🔄 **Remember the mirror.** The C3's labels are on the back. Mark the 5V pin before soldering.
 - 🧪 **Measure the TFT's CS pin before wiring it.** ([step 4](#4-check-the-tfts-cs-pin))
 - ⚡ **Battery to 5V through the switch, never to 3.3.**
-- 🔍 **Check 5V, G and 3.3 for shorts before the first power-up.** They're neighbors. ([step 9](#9-check-for-shorts-before-the-first-power-up))
+- 🔍 **Check 5V, G and 3.3 for shorts before the first power-up.** They're neighbors. ([step 10](#10-check-for-shorts-before-the-first-power-up))
 
 ### Power and battery
 
@@ -467,6 +525,9 @@ This repo includes a [`CLAUDE.md`](CLAUDE.md) and three skills for [Claude Code]
 | TFT dim or unreliable | Move the TFT's VCC from 3.3 to the C3's 5V pin. The module has its own regulator and is rated for 3.3–5 V |
 | OLED blank, Serial says `OLED not found` | SDA and SCL swapped (pins 3 and 4), or VCC/GND not connected |
 | OLED is all one color, no yellow strip | You have a single-color module. The yellow strip is printed into two-color screens, so the code can't change it |
+| Serial says `Sensor not found - video only` | The sensor's VIN, GND, SCL (4) or SDA (3), or its jumpers: CS to 3V3, SA0 to GND |
+| Balls fall to the top, or run the wrong way when you tilt the badge | The sensor isn't mounted chip to the back with its y axis up. Change `MOUNT` in `imu.h` to match, or ask Claude Code to work it out from what the balls do |
+| Shaking doesn't bring up the balls | Shake it **back and forth** along the screen, quickly: there, back and there again. A pick-up or a single bump doesn't count, on purpose |
 | Upload fails or no port | Hold BOOT, tap RESET, let go of BOOT, upload again. Use a USB **data** cable. Switch the badge off first |
 | Video slower than 16 fps | Check the Serial Monitor. Very detailed clips decode slower: try a lower `QUALITY` |
 | TP4056 never shows "full" | Switch the badge **off** while charging |

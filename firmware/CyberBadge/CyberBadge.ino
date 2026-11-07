@@ -4,7 +4,12 @@
 //      sent over SPI with DMA while the next block decodes.
 // OLED (0.96" SSD1306, 128x64): your email or handle scrolls along the top
 //      strip (yellow on two-colour modules), name + title sit below it.
-// BOOT button: switches video. The choice survives power-off.
+// LSM6DS3 (optional, on the OLED's I2C bus): shake the badge back and forth and the
+//      TFT shows a pool of balls that flows like water with the real motion, in layers
+//      of colour: fire, ocean or jungle. Once the balls have been still for 3 s the video
+//      comes back. No sensor: it just plays the video.
+// BOOT button: switches video, or, while the balls show, drops in a fresh pool in the
+//      next colours. Both choices survive power-off.
 //
 // Arduino IDE settings (Tools menu):
 //   Board:            Nologo ESP32C3 Super Mini
@@ -28,6 +33,8 @@
 #include <bb_spi_lcd.h>  // after Adafruit_GFX, so it reuses Adafruit's font types
 #include <JPEGDEC.h>
 
+#include "dots.h"
+#include "imu.h"
 #include "video_main.h"  // TODO: made from your own clip by tools/make_video.py
 
 // ---------- your details ----------
@@ -60,6 +67,10 @@ constexpr uint32_t OLED_I2C_HZ = 400000;
 constexpr uint32_t MARQUEE_STEP_MS = 40;   // ms between scroll steps
 constexpr int      MARQUEE_STEP_PX = 2;    // px per step: same speed as 1 px / 20 ms, half the redraws
 constexpr int      MARQUEE_GAP = 48;       // blank px between repeats of the email
+constexpr uint32_t IDLE_MS = 3000;         // the video starts once the balls have been still this long
+constexpr int      STRAY_BALLS = 10;       // this many still moving doesn't count: a few always jostle
+constexpr uint32_t DOTS_FRAME_US = 16667;  // 60 fps at most; the panel keeps its picture between frames
+constexpr int      DOTS_MAX_STEPS = 4;     // physics steps in one go, so drawing always gets a turn
 
 // Add more clips here; BOOT cycles through them and the first one plays by default.
 const Video *VIDEOS[] = {&main_video};
@@ -79,8 +90,16 @@ Preferences prefs;
 uint8_t oledAddr = 0;
 int oledChunk = 64;  // data bytes per I2C transfer; 256 if the Wire buffer could be enlarged
 uint8_t current = 0;
+uint8_t gradient = 0;  // the balls' colours, picked with BOOT while they show
 uint32_t videoStart = 0;
 uint32_t lastFrame = UINT32_MAX;
+
+enum Mode { VIDEO, DOTS };
+Mode mode = VIDEO;
+bool sensorFound = false;
+
+uint32_t physicsAt = 0;     // micros() of the last look at the clock
+uint64_t stepsOwed = 0;     // in millionths of a step
 
 // ---------- TFT video ----------
 
@@ -120,6 +139,125 @@ void switchVideo() {
   lastFrame = UINT32_MAX;
 }
 
+void startVideo() {
+  mode = VIDEO;
+  videoStart = millis();
+  lastFrame = UINT32_MAX;
+  imu::setFast(false);  // reading it 200 times a second costs 7% of the CPU, and the video needs that
+}
+
+void videoFrame() {
+  // Pick the frame by wall-clock time, so if decoding falls behind we skip
+  // frames instead of playing in slow motion.
+  const Video *v = VIDEOS[current];
+  uint32_t frame = (uint64_t)(millis() - videoStart) * v->fps / 1000 % v->frameCount;
+  if (frame == lastFrame) {
+    delay(1);
+    return;
+  }
+  drawFrame(v, frame);
+  lastFrame = frame;
+
+  static uint32_t drawn = 0, statsAt = 0, lastDrawAt = 0, slowest = 0;
+  uint32_t now = millis();
+  if (now - lastDrawAt > 1000) {  // the video has been off: start the numbers again
+    drawn = 0;
+    slowest = 0;
+    statsAt = now;
+  } else {
+    slowest = max(slowest, now - lastDrawAt);  // longest time the picture sat still
+  }
+  lastDrawAt = now;
+  drawn++;
+  if (now - statsAt >= 5000) {
+    if (Serial) Serial.printf("[%s] %.1f fps, slowest frame %lu ms (%s)\n", v->name, drawn * 1000.0f / (now - statsAt),
+                              (unsigned long)slowest, TFT_DMA_ON ? "DMA" : "no DMA");
+    drawn = 0;
+    slowest = 0;
+    statsAt = millis();
+  }
+}
+
+// ---------- TFT dots ----------
+
+// Same two transfers as a video block: the row goes out by DMA while the next one is built.
+void pushDots(int x, int y, int w, int h, uint16_t *pixels) {
+  if (TFT_DMA_ON) {
+    lcd.setAddrWindow(x, y, w, h);
+    lcd.pushPixels(pixels, w * h, DRAW_TO_LCD | DRAW_WITH_DMA);
+  } else {
+    tft.startWrite();
+    tft.setAddrWindow(x, y, w, h);
+    tft.writePixels(pixels, w * h, true, true);
+    tft.endWrite();
+  }
+}
+
+uint32_t dotsFrames = 0, physicsBusyUs = 0, stepsDone = 0, dotsStatsAt = 0, ballsMovedAt = 0;
+
+// Runs the steps that are due. Called between rows of drawing too, so the physics keeps
+// real time while a frame goes out.
+void runPhysics() {
+  dots::Motion m;
+  if (imu::takeMotion(m)) dots::setMotion(m);
+
+  uint32_t now = micros();
+  stepsOwed += (uint64_t)(now - physicsAt) * dots::STEPS_PER_SECOND;
+  physicsAt = now;
+  for (int i = 0; i < DOTS_MAX_STEPS && stepsOwed >= 1000000; i++) {
+    dots::step();
+    stepsOwed -= 1000000;
+    stepsDone++;
+  }
+  // Too far behind to catch up: let that time go. The balls run a little slow for a
+  // moment, which nobody can see, instead of the frame rate collapsing.
+  if (stepsOwed >= DOTS_MAX_STEPS * 1000000ULL) stepsOwed = 0;
+  physicsBusyUs += micros() - now;
+}
+
+void startDots() {
+  if (TFT_DMA_ON) lcd.waitDMA();  // the video's last block may still be going out
+  dots::redrawAll();
+  imu::restart();
+  physicsAt = micros();
+  stepsOwed = 0;
+  dotsFrames = physicsBusyUs = stepsDone = 0;
+  dotsStatsAt = ballsMovedAt = millis();
+  mode = DOTS;
+  imu::setFast(true);
+}
+
+void dotsFrame() {
+  uint32_t frameStart = micros();
+  dots::draw(pushDots, runPhysics);
+  do {
+    runPhysics();
+    delay(1);  // the idle task must get a turn, or the watchdog resets the chip
+  } while (micros() - frameStart < DOTS_FRAME_US);
+
+  dotsFrames++;
+  uint32_t now = millis();
+  if (dots::movingBalls() > STRAY_BALLS) ballsMovedAt = now;
+  if (now - dotsStatsAt >= 5000) {
+    float seconds = (now - dotsStatsAt) / 1000.0f;
+    if (Serial) {
+      Serial.printf("[dots] %.1f fps, physics %.0f%% of the CPU, running at %.0f%% of real time\n", dotsFrames / seconds,
+                    physicsBusyUs / (seconds * 10000), stepsDone * 100.0f / (seconds * dots::STEPS_PER_SECOND));
+    }
+    dotsFrames = physicsBusyUs = stepsDone = 0;
+    dotsStatsAt = now;
+  }
+}
+
+// A fresh pool in the next colours falls in from the top, with a full IDLE_MS to show off.
+void switchGradient() {
+  gradient = (gradient + 1) % dots::paletteCount();
+  prefs.putUChar("gradient", gradient);
+  dots::dropIn(gradient);
+  ballsMovedAt = millis();
+  if (Serial) Serial.printf("[dots] %s\n", dots::paletteName(gradient));
+}
+
 void pollButton() {
   static bool wasDown = false;
   static uint32_t changedAt = 0;
@@ -127,7 +265,8 @@ void pollButton() {
   if (down != wasDown && millis() - changedAt > 30) {
     changedAt = millis();
     wasDown = down;
-    if (down) switchVideo();
+    if (down && mode == DOTS) switchGradient();
+    else if (down) switchVideo();
   }
 }
 
@@ -248,33 +387,28 @@ void setup() {
 
   prefs.begin("cyberbadge");
   current = prefs.getUChar("clip", 0) % VIDEO_COUNT;  // last clip picked with BOOT
-  videoStart = millis();
+
+  sensorFound = imu::begin();
+  if (sensorFound) {
+    gradient = prefs.getUChar("gradient", 0) % dots::paletteCount();  // last colours picked with BOOT
+    dots::begin(gradient);
+    startDots();
+  } else {
+    Serial.println("Sensor not found - video only");
+    startVideo();
+  }
 }
 
 void loop() {
   pollButton();
 
-  // Pick the frame by wall-clock time, so if decoding falls behind we skip
-  // frames instead of playing in slow motion.
-  const Video *v = VIDEOS[current];
-  uint32_t frame = (uint64_t)(millis() - videoStart) * v->fps / 1000 % v->frameCount;
-  if (frame == lastFrame) {
-    delay(1);
-    return;
+  if (sensorFound && imu::working()) {
+    if (mode == DOTS && millis() - ballsMovedAt >= IDLE_MS) startVideo();
+    else if (mode == VIDEO && imu::shaken()) startDots();
+  } else if (mode == DOTS) {
+    startVideo();  // the sensor stopped answering
   }
-  drawFrame(v, frame);
-  lastFrame = frame;
 
-  static uint32_t drawn = 0, statsAt = 0, lastDrawAt = 0, slowest = 0;
-  uint32_t now = millis();
-  if (lastDrawAt) slowest = max(slowest, now - lastDrawAt);  // longest time the picture sat still
-  lastDrawAt = now;
-  drawn++;
-  if (now - statsAt >= 5000) {
-    if (Serial) Serial.printf("[%s] %.1f fps, slowest frame %lu ms (%s)\n", v->name, drawn * 1000.0f / (now - statsAt),
-                              (unsigned long)slowest, TFT_DMA_ON ? "DMA" : "no DMA");
-    drawn = 0;
-    slowest = 0;
-    statsAt = millis();
-  }
+  if (mode == DOTS) dotsFrame();
+  else videoFrame();
 }

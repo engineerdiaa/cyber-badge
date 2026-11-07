@@ -17,3 +17,6 @@ build/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Original assistant playbook backup stays local
+/CLAUDE.md.bak

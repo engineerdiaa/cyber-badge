@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="545" viewBox="0 0 1000 545" role="img" aria-label="Schematic: LiPo to TP4056 B+ and B-. TP4056 OUT+ through switch SW1 to the C3 5V pin, which feeds the onboard 3.3 V regulator. The C3 3V3 pin powers TFT VCC and OLED VCC. TP4056 OUT-, C3 GND, TFT GND and OLED GND are ground. GPIO 5, 6, 7, 10, 20, 21 go to TFT SCL, SDA, RES, DC, CS, BLK. GPIO 4 and 3 go to OLED SCL and SDA."><style>text{font-family:'JetBrains Mono',Consolas,'DejaVu Sans Mono',monospace}.d-module{fill:#E3EAF4;stroke:#1F3A63;stroke-width:1.5}.d-module-label{fill:#1F3A63;font-size:12px}.d-mcu{fill:#22262A}.d-mcu-pin{fill:#E8EBEE;font-size:12px;font-weight:600}.d-mcu-pin.unused{opacity:0.45;font-weight:400}.d-mcu-label{fill:#E8EBEE;font-size:12px}.d-metal{fill:#A9B0B7}.d-screen{fill:#0B0D10}.d-pin-label{fill:#1F3A63;font-size:12px;font-weight:600}.d-pad{fill:#B0682B}.d-note{fill:#59655E;font-size:11px}.d-wire{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.d-tag-text{fill:#FFFFFF;font-size:11px;font-weight:600}.d-lipo{fill:#A9B0B7;opacity:0.55;stroke:#59655E;stroke-width:1.2}.d-ink{fill:#16201B;font-size:12px}.s-block{fill:#FFFFFF;stroke:#16201B;stroke-width:1.5}.s-inner{fill:none;stroke:#59655E;stroke-width:1.2;stroke-dasharray:4 3}.s-line{fill:none;stroke:#16201B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.s-line-pwr{stroke:#D42A2A}.s-text{fill:#16201B;font-size:12px}.s-title{fill:#16201B;font-size:13px;font-weight:600}.s-muted{fill:#59655E;font-size:10.5px}.s-pin{fill:#16201B;font-size:11px;font-weight:600}.s-3v3{fill:#D42A2A;font-size:11px;font-weight:600}</style><rect width="100%" height="100%" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="770" viewBox="0 0 1000 770" role="img" aria-label="Schematic: LiPo to TP4056 B+ and B-. TP4056 OUT+ through switch SW1 to the C3 5V pin, which feeds the onboard 3.3 V regulator. The C3 3V3 pin powers TFT VCC, OLED VCC and the motion sensor's VIN. TP4056 OUT-, C3 GND, TFT GND, OLED GND, sensor GND and sensor SA0 are ground. GPIO 5, 6, 7, 10, 20, 21 go to TFT SCL, SDA, RES, DC, CS, BLK. GPIO 4 and 3 go to OLED SCL and SDA, and on to the optional LSM6DS3 motion sensor's SCL and SDA. GPIO 0 goes to the sensor's INT1. The sensor's CS is jumpered to its own 3V3 pin."><style>text{font-family:'JetBrains Mono',Consolas,'DejaVu Sans Mono',monospace}.d-module{fill:#E3EAF4;stroke:#1F3A63;stroke-width:1.5}.d-module-label{fill:#1F3A63;font-size:12px}.d-mcu{fill:#22262A}.d-mcu-pin{fill:#E8EBEE;font-size:12px;font-weight:600}.d-mcu-pin.unused{opacity:0.45;font-weight:400}.d-mcu-label{fill:#E8EBEE;font-size:12px}.d-metal{fill:#A9B0B7}.d-screen{fill:#0B0D10}.d-pin-label{fill:#1F3A63;font-size:12px;font-weight:600}.d-pad{fill:#B0682B}.d-note{fill:#59655E;font-size:11px}.d-wire{fill:none;stroke-width:3;stroke-linejoin:round;stroke-linecap:round}.d-tag-text{fill:#FFFFFF;font-size:11px;font-weight:600}.d-lipo{fill:#A9B0B7;opacity:0.55;stroke:#59655E;stroke-width:1.2}.d-ink{fill:#16201B;font-size:12px}.s-block{fill:#FFFFFF;stroke:#16201B;stroke-width:1.5}.s-inner{fill:none;stroke:#59655E;stroke-width:1.2;stroke-dasharray:4 3}.s-line{fill:none;stroke:#16201B;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.s-line-pwr{stroke:#D42A2A}.s-text{fill:#16201B;font-size:12px}.s-title{fill:#16201B;font-size:13px;font-weight:600}.s-muted{fill:#59655E;font-size:10.5px}.s-pin{fill:#16201B;font-size:11px;font-weight:600}.s-3v3{fill:#D42A2A;font-size:11px;font-weight:600}</style><rect width="100%" height="100%" fill="#ffffff"/>
           <defs>
             <g id="sch-gnd"><path class="s-line" d="M0 0 V14 M-14 14 H14 M-9 20 H9 M-4 26 H4"/></g>
             <g id="sch-3v3"><path class="s-line s-line-pwr" d="M0 0 V-18 M-10 -18 H10"/><text class="s-3v3" y="-24" text-anchor="middle">3V3</text></g>
@@ -42,7 +42,7 @@
           <use href="#sch-gnd" x="372" y="330"/>
 
           <!-- C3 Super Mini -->
-          <rect class="s-block" x="520" y="120" width="180" height="340" rx="6"/>
+          <rect class="s-block" x="520" y="120" width="180" height="370" rx="6"/>
           <text class="s-muted" x="530" y="140" letter-spacing="0.06em">C3 SUPER MINI</text>
           <text class="s-pin" x="527" y="163">5V</text>
           <path class="s-inner" d="M520 170 H560 M616 170 H650 V120"/>
@@ -51,7 +51,7 @@
           <text class="s-pin" x="660" y="140">3V3</text>
           <text class="s-muted" x="528" y="204">onboard 3.3 V regulator</text>
           <use href="#sch-3v3" x="650" y="120"/>
-          <text class="s-muted" x="666" y="104">powers both screens</text>
+          <text class="s-muted" x="666" y="104">powers the screens and sensor</text>
           <rect class="s-inner" style="stroke-dasharray:none" x="548" y="218" width="92" height="214" rx="4"/>
           <text class="s-title" x="594" y="318" text-anchor="middle">ESP32-C3</text>
           <text class="s-muted" x="594" y="342" text-anchor="middle">GPIO9 =</text>
@@ -65,9 +65,10 @@
             <text class="s-pin" x="692" y="339">GPIO21</text>
             <text class="s-pin" x="692" y="414">GPIO4</text>
             <text class="s-pin" x="692" y="439">GPIO3</text>
+            <text class="s-pin" x="692" y="464">GPIO0</text>
           </g>
-          <text class="s-pin" x="580" y="452" text-anchor="middle">GND</text>
-          <use href="#sch-gnd" x="580" y="460"/>
+          <text class="s-pin" x="580" y="482" text-anchor="middle">GND</text>
+          <use href="#sch-gnd" x="580" y="490"/>
 
           <!-- TFT -->
           <rect class="s-block" x="800" y="180" width="160" height="180" rx="6"/>
@@ -96,6 +97,24 @@
           <use href="#sch-3v3" x="930" y="395"/>
           <use href="#sch-gnd" x="880" y="500"/>
 
+          <!-- motion sensor (optional) -->
+          <rect class="s-block" x="800" y="585" width="160" height="140" rx="6"/>
+          <text class="s-pin" x="808" y="624">SCL</text>
+          <text class="s-pin" x="808" y="649">SDA</text>
+          <text class="s-pin" x="808" y="674">INT1</text>
+          <text class="s-pin" x="845" y="603" text-anchor="middle">3V3</text>
+          <text class="s-pin" x="875" y="603" text-anchor="middle">CS</text>
+          <text class="s-pin" x="930" y="603" text-anchor="middle">VIN</text>
+          <text class="s-pin" x="880" y="717" text-anchor="middle">GND</text>
+          <text class="s-pin" x="930" y="717" text-anchor="middle">SA0</text>
+          <text class="s-title" x="900" y="652" text-anchor="middle">LSM6DS3</text>
+          <text class="s-muted" x="900" y="668" text-anchor="middle">motion sensor</text>
+          <text class="s-muted" x="900" y="682" text-anchor="middle">optional</text>
+          <path class="s-line" d="M845 585 V572 H875 V585"/>
+          <use href="#sch-3v3" x="930" y="585"/>
+          <use href="#sch-gnd" x="880" y="725"/>
+          <use href="#sch-gnd" x="930" y="725"/>
+
           <!-- signals -->
           <path class="d-wire" stroke="#D97706"  d="M700 210 H800"/>
           <path class="d-wire" stroke="#2563EB" d="M700 235 H800"/>
@@ -105,14 +124,22 @@
           <path class="d-wire" stroke="#5F8F0B"  d="M700 335 H800"/>
           <path class="d-wire" stroke="#E2580F"  d="M700 410 H800"/>
           <path class="d-wire" stroke="#0B86A8"  d="M700 435 H800"/>
+          <!-- the sensor shares SCL and SDA; SCL hops over SDA -->
+          <path class="d-wire" stroke="#E2580F"  d="M770 410 V428 A7 7 0 0 1 770 442 V620 H800"/>
+          <path class="d-wire" stroke="#0B86A8"  d="M750 435 V645 H800"/>
+          <path class="d-wire" stroke="#64748B"  d="M700 460 H730 V670 H800"/>
+          <circle cx="770" cy="410" r="4.5" fill="#E2580F"/>
+          <circle cx="750" cy="435" r="4.5" fill="#0B86A8"/>
 
           <g class="d-pad">
             <circle cx="180" cy="182" r="4"/><circle cx="180" cy="330" r="4"/><circle cx="340" cy="182" r="4"/><circle cx="340" cy="330" r="4"/>
-            <circle cx="520" cy="170" r="4"/><circle cx="650" cy="120" r="4"/><circle cx="580" cy="460" r="4"/>
+            <circle cx="520" cy="170" r="4"/><circle cx="650" cy="120" r="4"/><circle cx="580" cy="490" r="4"/><circle cx="700" cy="460" r="4"/>
             <circle cx="700" cy="210" r="4"/><circle cx="700" cy="235" r="4"/><circle cx="700" cy="260" r="4"/><circle cx="700" cy="285" r="4"/>
             <circle cx="700" cy="310" r="4"/><circle cx="700" cy="335" r="4"/><circle cx="700" cy="410" r="4"/><circle cx="700" cy="435" r="4"/>
             <circle cx="800" cy="210" r="4"/><circle cx="800" cy="235" r="4"/><circle cx="800" cy="260" r="4"/><circle cx="800" cy="285" r="4"/>
             <circle cx="800" cy="310" r="4"/><circle cx="800" cy="335" r="4"/><circle cx="800" cy="410" r="4"/><circle cx="800" cy="435" r="4"/>
             <circle cx="880" cy="180" r="4"/><circle cx="880" cy="360" r="4"/><circle cx="930" cy="395" r="4"/><circle cx="880" cy="500" r="4"/>
+            <circle cx="800" cy="620" r="4"/><circle cx="800" cy="645" r="4"/><circle cx="800" cy="670" r="4"/>
+            <circle cx="845" cy="585" r="4"/><circle cx="875" cy="585" r="4"/><circle cx="930" cy="585" r="4"/><circle cx="880" cy="725" r="4"/><circle cx="930" cy="725" r="4"/>
           </g>
         </svg>
