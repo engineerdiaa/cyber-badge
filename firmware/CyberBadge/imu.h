@@ -69,5 +69,6 @@ bool working();                // false once it stops answering
 bool shaken();                 // shaken on purpose since the last setFast()
 void restart();                // forget readings that piled up while nobody was taking them
 bool takeMotion(dots::Motion &m);  // false if there is nothing new
+void gravityNow(dots::Motion &m);  // just which way is down at the latest reading, no shake or turn
 
 }  // namespace imu

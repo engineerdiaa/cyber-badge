@@ -4,13 +4,13 @@
 //      sent over SPI with DMA while the next block decodes.
 // OLED (0.96" SSD1306, 128x64): your email or handle scrolls along the top
 //      strip (yellow on two-colour modules), name + title sit below it.
-// LSM6DS3 (optional, on the OLED's I2C bus): shake the badge back and forth and the
-//      TFT shows a pool of balls that flows like water with the real motion, in layers
-//      of colour: fire, ocean or jungle. Once the balls have been still for 3 s the video
-//      comes back. No sensor: it just plays the video.
+// LSM6DS3 (optional, on the OLED's I2C bus): shake the badge back and forth and a pool of
+//      balls comes in on the TFT, its colours' own way: fire explodes, ocean pours down the
+//      sides, jungle's balloon pops. It flows like water with the real motion, in layers of
+//      colour. Once the balls have been still for 3 s the video comes back. No sensor: it
+//      just plays the video.
 // BOOT button: switches video, or, while the balls show, brings in a fresh pool in the
-//      next colours: fire explodes, ocean pours down the sides, jungle's balloon pops.
-//      Both choices survive power-off.
+//      next colours, its own way. Both choices survive power-off.
 //
 // Arduino IDE settings (Tools menu):
 //   Board:            Nologo ESP32C3 Super Mini
@@ -70,6 +70,7 @@ constexpr int      MARQUEE_STEP_PX = 2;    // px per step: same speed as 1 px / 
 constexpr int      MARQUEE_GAP = 48;       // blank px between repeats of the email
 constexpr uint32_t IDLE_MS = 3000;         // the video starts once the balls have been still this long
 constexpr int      STRAY_BALLS = 10;       // this many still moving doesn't count: a few always jostle
+constexpr uint32_t WAKE_CALM_MS = 600;     // after a wake-up shake, its last swings are ignored this long
 constexpr uint32_t DOTS_FRAME_US = 16667;  // 60 fps at most; the panel keeps its picture between frames
 constexpr int      DOTS_MAX_STEPS = 4;     // physics steps in one go, so drawing always gets a turn
 
@@ -194,13 +195,18 @@ void pushDots(int x, int y, int w, int h, uint16_t *pixels) {
   }
 }
 
-uint32_t dotsFrames = 0, physicsBusyUs = 0, stepsDone = 0, dotsStatsAt = 0, ballsMovedAt = 0;
+uint32_t dotsFrames = 0, physicsBusyUs = 0, stepsDone = 0, dotsStatsAt = 0, ballsMovedAt = 0, wokeAt = 0;
 
 // Runs the steps that are due. Called between rows of drawing too, so the physics keeps
 // real time while a frame goes out.
 void runPhysics() {
   dots::Motion m;
-  if (imu::takeMotion(m)) dots::setMotion(m);
+  if (imu::takeMotion(m)) {
+    // The shake that brought the balls up still has a swing or two in it, which would throw
+    // their entrance about. Until WAKE_CALM_MS they feel only gravity.
+    if (millis() - wokeAt < WAKE_CALM_MS) m.shakeX = m.shakeY = m.wx = m.wy = m.wz = 0;
+    dots::setMotion(m);
+  }
 
   uint32_t now = micros();
   stepsOwed += (uint64_t)(now - physicsAt) * dots::STEPS_PER_SECOND;
@@ -216,16 +222,21 @@ void runPhysics() {
   physicsBusyUs += micros() - now;
 }
 
+// A fresh pool comes in its colours' own way, laid out for which way is down right now.
 void startDots() {
   if (TFT_DMA_ON) lcd.waitDMA();  // the video's last block may still be going out
-  dots::redrawAll();
+  dots::Motion down;
+  imu::gravityNow(down);
+  dots::setMotion(down);
+  dots::dropIn(gradient);  // repaints the whole screen
   imu::restart();
   physicsAt = micros();
   stepsOwed = 0;
   dotsFrames = physicsBusyUs = stepsDone = 0;
-  dotsStatsAt = ballsMovedAt = millis();
+  dotsStatsAt = ballsMovedAt = wokeAt = millis();
   mode = DOTS;
   imu::setFast(true);
+  if (Serial) Serial.printf("[dots] %s\n", dots::paletteName(gradient));
 }
 
 void dotsFrame() {

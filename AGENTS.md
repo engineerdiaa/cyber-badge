@@ -23,7 +23,7 @@ Claude Code and Codex use this file as the shared playbook. CLAUDE.md only impor
   and back. Placeholders are marked `TODO` (`EMAIL`, `NAME`, `TITLE`, the video include).
 - `firmware/CyberBadge/dots.cpp`, `dots.h`: the balls. Tuning is at the top of `dots.h`; the
   colours are `PALETTES` in `dots.cpp` (four stops from the surface to the floor, a glint, and
-  how BOOT brings them in: `BLAST`, `POUR` or `BALLOON`).
+  how they come in, on a shake or BOOT: `BLAST`, `POUR` or `BALLOON`).
 - `firmware/CyberBadge/imu.cpp`, `imu.h`: the sensor task: the wake-up shake, lying on a table,
   and splitting each reading into gravity and shaking. `MOUNT` says how the sensor sits.
 - `firmware/CyberBadge/video_<name>.h`: generated clips. Never edit by hand; regenerate with
@@ -50,8 +50,8 @@ Claude Code and Codex use this file as the shared playbook. CLAUDE.md only impor
   isn't detected. While the balls show, it's
   `[dots] 43.6 fps, physics 49% of the CPU, running at 100% of real time` instead (300 balls:
   28–58 fps, 36–56% of the CPU, and it should stay at 99–100% of real time), plus
-  `[dots] <colours>` on each BOOT press. Without a sensor: `Sensor not found - video only` once
-  at boot.
+  `[dots] <colours>` each time the balls come in (a shake or BOOT). Without a sensor:
+  `Sensor not found - video only` once at boot.
 - Ask before uploading to someone's board, and remind them to switch the badge off before
   plugging USB into the C3 when the battery is connected (USB 5V and the battery meet at the
   5V pin).

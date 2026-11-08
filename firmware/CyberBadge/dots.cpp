@@ -697,7 +697,8 @@ bool draw(PushFn push, IdleFn idle) {
 // shades. A channel past 255 saturates most of the ball, which is what makes the green neon.
 // The far side of a ball keeps DARK_SIDE of its colour, and the glint goes on top.
 //
-// Each palette's fresh pool comes in its own way when BOOT brings it in.
+// Each palette's fresh pool comes in its own way, whether a shake brings up the balls or BOOT
+// brings in the next colours.
 
 constexpr int STOPS = 4;
 

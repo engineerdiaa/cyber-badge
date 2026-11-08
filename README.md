@@ -71,7 +71,8 @@ flowchart LR
 - The **OLED** shows your name and title, with your email or handle scrolling along the top strip in a background task.
 - The **motion sensor** (optional) shares the OLED's two I2C wires. **Shake the badge back and forth** and the TFT switches from the video to a pool of balls that sloshes like water with every move and tilt. Once the balls have been still for 3 seconds, the video comes back. Lying still on a table, they sink to the bottom edge as if the badge stood upright. Without the sensor, the badge just plays the video.
 - The balls come in **layers of color**, light at the surface and dark along the edge they rest on: **fire**, **ocean** or **jungle**. A shake stirs the colors, and they settle back into layers about 1.5 seconds after the balls stop.
-- The **BOOT button** (already on the C3) switches between clips if you add more than one. While the balls show, it brings in a fresh pool in the next colors, each its own way: fire explodes against the walls, ocean pours down both sides, and jungle's balloon of water pops. The badge remembers both choices.
+- Each palette **comes in its own way**, whether a shake brings up the balls or BOOT changes the colors: fire explodes against the walls, ocean pours down both sides, and jungle's balloon of water pops.
+- The **BOOT button** (already on the C3) switches between clips if you add more than one. While the balls show, it brings in a fresh pool in the next colors. The badge remembers both choices.
 
 And on your PC, before flashing:
 
@@ -284,7 +285,7 @@ Skip this step for a badge that just plays the video.
 2. Solder its header so the **chip faces away from the board**, using the perfboard as a jig ([step 3](#3-solder-the-headers-using-the-perfboard-as-a-jig)).
 3. Place it on the back as in the [board layout](#board-layout): square to the edges, with its **y axis pointing at the top edge**, away from the TP4056.
 4. Wire it from the [table](#motion-sensor-optional), with two short jumpers on the sensor itself: **CS to 3V3** and **SA0 to GND**.
-5. Press **RESET**. The video plays as before. Shake the badge there, back and there again, and the balls take over the screen; the video comes back once they've been still for 3 seconds.
+5. Press **RESET**. The video plays as before. Shake the badge there, back and there again, and the balls take over the screen in their palette's own way; the video comes back once they've been still for 3 seconds.
 
 ### 9. Wire the power section
 
@@ -419,7 +420,7 @@ The palettes are in [`dots.cpp`](firmware/CyberBadge/dots.cpp) (search for `PALE
 {"fire", {{290, 225, 70}, {285, 135, 15}, {225, 45, 5}, {105, 5, 4}}, {110, 100, 70}, BLAST},  // gold to dark red
 ```
 
-That's a name, four red-green-blue colors from the surface of the pool down to the floor, blended over 16 shades, the color of the glint, and how BOOT brings the colors in: `BLAST` (a fireball explodes), `POUR` (water pours off the top and down both sides) or `BALLOON` (a balloon of water pops). A value above 255 saturates most of the ball, which is what makes jungle's top layer glow neon. Add a line and BOOT cycles through it too.
+That's a name, four red-green-blue colors from the surface of the pool down to the floor, blended over 16 shades, the color of the glint, and how the colors come in: `BLAST` (a fireball explodes), `POUR` (water pours off the top and down both sides) or `BALLOON` (a balloon of water pops). A value above 255 saturates most of the ball, which is what makes jungle's top layer glow neon. Add a line and BOOT cycles through it too.
 
 `MIXING = false` in [`dots.h`](firmware/CyberBadge/dots.h) colors each ball by where it is at every moment, so the layers never mix, even mid-shake.
 
@@ -448,6 +449,7 @@ This repo includes a playbook, [`AGENTS.md`](AGENTS.md) (which `CLAUDE.md` loads
 | `TFT_SPI_HZ` | 40 MHz | Lower to 26 MHz if you see streaks with long wires |
 | `MARQUEE_STEP_MS`, `MARQUEE_STEP_PX` | 40 ms, 2 px | OLED scroll speed |
 | `IDLE_MS` | 3000 ms | How long the balls must be still before the video comes back |
+| `WAKE_CALM_MS` | 600 ms | After a shake brings up the balls, how long they ignore its last swings, so their entrance plays out |
 
 ### Balls and motion sensor ([`dots.h`](firmware/CyberBadge/dots.h), [`imu.h`](firmware/CyberBadge/imu.h))
 
@@ -456,7 +458,7 @@ This repo includes a playbook, [`AGENTS.md`](AGENTS.md) (which `CLAUDE.md` loads
 | `COUNT` | `300` | How many balls. More fill more of the screen but cost more CPU: keep the `[dots]` line at 100% of real time |
 | `MIXING` | `true` | `false` keeps the colors in layers even mid-shake ([more](#the-balls-colors)) |
 | `SETTLE_S` | 0.5 s | How quickly stirred colors settle back into layers: most of the way in three times this |
-| `BLAST_PX`, `POUR_S`, `BURST_PX` | 1000 px/s, 1 s, 60 px/s | BOOT's entrances: how hard fire explodes, how long ocean pours, how hard jungle's balloon pops |
+| `BLAST_PX`, `POUR_S`, `BURST_PX` | 1000 px/s, 1 s, 60 px/s | The entrances: how hard fire explodes, how long ocean pours, how hard jungle's balloon pops |
 | `SWING_G` | 0.35 g | How hard each swing of the wake-up shake has to be |
 | `WAKE_SWINGS` | `3` | Swings in a row, each the other way, that bring up the balls. Picking the badge up makes two |
 | `MOUNT` | Chip to the back, y axis up | How the sensor sits on the board. Change it if the balls fall the wrong way |

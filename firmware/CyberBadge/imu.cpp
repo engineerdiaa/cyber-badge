@@ -129,6 +129,7 @@ static volatile int sampleMs = SAMPLE_MS;
 // Shared with the task.
 static portMUX_TYPE lock = portMUX_INITIALIZER_UNLOCKED;
 static float sumGravity[3], sumShake[3], sumTurn[3];
+static float lastGravity[3];  // the latest reading's, so a fresh pool can be laid the right way up
 static int summed;
 
 static bool writeRegister(uint8_t reg, uint8_t value) {
@@ -182,6 +183,7 @@ static void sensorTask(void *) {
       sumGravity[i] += felt[i];
       sumShake[i] += a[i] - down[i];
       sumTurn[i] += g[i];
+      lastGravity[i] = felt[i];
     }
     summed++;
     portEXIT_CRITICAL(&lock);
@@ -253,6 +255,15 @@ bool takeMotion(dots::Motion &m) {
   m = {screenGravity[0], screenGravity[1], screenShake[0], screenShake[1], screenTurn[0], screenTurn[1], screenTurn[2],
        count * sampleMs * 0.001f};
   return true;
+}
+
+void gravityNow(dots::Motion &m) {
+  float gravity[3], screen[3];
+  portENTER_CRITICAL(&lock);
+  memcpy(gravity, lastGravity, sizeof(gravity));
+  portEXIT_CRITICAL(&lock);
+  toScreen(gravity, screen);
+  m = {screen[0], screen[1], 0, 0, 0, 0, 0, 0};
 }
 
 }  // namespace imu
