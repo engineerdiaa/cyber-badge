@@ -22,7 +22,8 @@ Claude Code and Codex use this file as the shared playbook. CLAUDE.md only impor
 - `firmware/CyberBadge/CyberBadge.ino`: the sketch: video, OLED, BOOT, and switching to the balls
   and back. Placeholders are marked `TODO` (`EMAIL`, `NAME`, `TITLE`, the video include).
 - `firmware/CyberBadge/dots.cpp`, `dots.h`: the balls. Tuning is at the top of `dots.h`; the
-  colours are `PALETTES` in `dots.cpp` (four stops from the surface to the floor, and a glint).
+  colours are `PALETTES` in `dots.cpp` (four stops from the surface to the floor, a glint, and
+  how BOOT brings them in: `BLAST`, `POUR` or `BALLOON`).
 - `firmware/CyberBadge/imu.cpp`, `imu.h`: the sensor task: the wake-up shake, lying on a table,
   and splitting each reading into gravity and shaking. `MOUNT` says how the sensor sits.
 - `firmware/CyberBadge/video_<name>.h`: generated clips. Never edit by hand; regenerate with
@@ -73,9 +74,9 @@ Claude Code and Codex use this file as the shared playbook. CLAUDE.md only impor
   chip side up.
 - **Pins:** TFT SCL 5, SDA 6, RES 7, DC 10, CS 20, BLK 21; OLED SDA 3, SCL 4, shared with the
   motion sensor (0x6A or 0x6B), whose INT1 is wired to GPIO 0 but unused (the firmware polls);
-  GPIO 9 is the BOOT button: it switches clips while the video plays, and drops in a fresh pool
-  in the next colours while the balls show. If pins change, update the sketch, the README wiring
-  tables and the schematic together.
+  GPIO 9 is the BOOT button: it switches clips while the video plays, and brings in a fresh pool
+  in the next colours, each palette its own way, while the balls show. If pins change, update
+  the sketch, the README wiring tables and the schematic together.
 - **The sensor's mount is in code.** `MOUNT` in `imu.h` is chip to the back of the badge, y axis
   to the top edge. Balls that fall to the top or run the wrong way when tilted mean the sensor
   sits another way.

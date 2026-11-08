@@ -121,6 +121,18 @@ static int32_t turnXX, turnXY, turnYX, turnYY;  // Q24 per step^2: centrifugal a
 static int32_t coriolis;             // Q16 radians per step
 static uint32_t stepsSinceColour;
 static float upX = 0, upY = -1;      // which way the colour layers stack
+static uint32_t noise = 2463534242u; // so no two fresh pools come in quite the same way
+
+// The ocean's ledge, while ledgeSteps counts down: a low roof that holds the water up along
+// the top, all but a gap at each end. It slopes down both ways from a ridge through the middle
+// of the screen, so the water runs off both ends. Heights and places across are Q8 px from the
+// middle of the screen.
+static int ledgeSteps;
+static int32_t ledgeUpX, ledgeUpY;          // Q14: which way was up when it went in
+static int32_t ledgeHeight;                 // of the ridge
+static int32_t ledgeFrom, ledgeTo;          // where across it ends, short of the screen's edges
+static int32_t ledgeSlope;                  // Q14: px down per px out from the ridge
+static int32_t ledgeOutX[2], ledgeOutY[2];  // Q14: which way a ball is put back on it, each side
 
 static inline int32_t absolute(int32_t v) { return v < 0 ? -v : v; }
 
@@ -329,6 +341,36 @@ static void HOT pushApart() {
   }
 }
 
+static inline int32_t HOT ledgeUp(int32_t x, int32_t y) {
+  return (((x - CENTER_X) >> 8) * ledgeUpX + ((y - CENTER_Y) >> 8) * ledgeUpY) >> 14;
+}
+
+static inline int32_t HOT ledgeAcross(int32_t x, int32_t y) {
+  return (((y - CENTER_Y) >> 8) * ledgeUpX - ((x - CENTER_X) >> 8) * ledgeUpY) >> 14;
+}
+
+static inline int32_t HOT ledgeAt(int32_t across) {  // its height there
+  return ledgeHeight - ((absolute(across) * ledgeSlope) >> 14);
+}
+
+// A ball that started the step on the ledge or above it can't go through: it is put back on
+// it square to the slope, so the water slides down it as down a floor and runs off the ends.
+// A ball that has fallen past an end, or was already below, is free.
+static void HOT holdUpLake() {
+  constexpr int32_t SLACK = 64;  // Q8: a quarter pixel, for rounding in the last step's put-back
+  for (int i = 0; i < COUNT; i++) {
+    Ball &ball = balls[i];
+    int32_t s = ledgeAcross(ball.x, ball.y);
+    if (s < ledgeFrom || s > ledgeTo) continue;
+    int32_t under = ledgeAt(s) - ledgeUp(ball.x, ball.y);
+    if (under <= 0) continue;
+    if (ledgeUp(ball.oldX, ball.oldY) - ledgeAt(ledgeAcross(ball.oldX, ball.oldY)) < -SLACK) continue;
+    int side = s > 0;  // Q8 px times Q14 is Q22, a shift of 6 from Q16
+    ball.x += (under * ledgeOutX[side]) >> 6;
+    ball.y += (under * ledgeOutY[side]) >> 6;
+  }
+}
+
 void HOT step() {
   // Forces, then a free move to where each ball wants to go.
   for (int i = 0; i < COUNT; i++) {
@@ -366,12 +408,17 @@ void HOT step() {
     ball.crowd = ball.closeCrowd = 0;
   }
   keepInside();
+  if (ledgeSteps) holdUpLake();
 
   if (pairsStale || !pairsStillGood()) findPairs();
   feelNeighbours();
   findPressures();
   pushApart();
   keepInside();
+  if (ledgeSteps) {
+    holdUpLake();
+    ledgeSteps--;
+  }
 
   // Velocities come from what actually happened.
   for (int i = 0; i < COUNT; i++) {
@@ -649,18 +696,27 @@ bool draw(PushFn push, IdleFn idle) {
 // Colours at full light, from the top of the pool down to the floor, spread evenly over the
 // shades. A channel past 255 saturates most of the ball, which is what makes the green neon.
 // The far side of a ball keeps DARK_SIDE of its colour, and the glint goes on top.
+//
+// Each palette's fresh pool comes in its own way when BOOT brings it in.
 
 constexpr int STOPS = 4;
+
+enum Entrance : uint8_t {
+  BLAST,    // a fireball in the middle explodes against every wall
+  POUR,     // a lake along the top pours off both ends and down the sides
+  BALLOON,  // water in a balloon up high pops and falls
+};
 
 struct Palette {
   const char *name;
   int16_t lit[STOPS][3];  // RGB
   int16_t glint[3];
+  Entrance entrance;
 };
 static const Palette PALETTES[] = {
-    {"fire", {{290, 225, 70}, {285, 135, 15}, {225, 45, 5}, {105, 5, 4}}, {110, 100, 70}},     // gold to dark red
-    {"ocean", {{120, 240, 290}, {25, 150, 275}, {6, 60, 200}, {3, 10, 72}}, {110, 115, 100}},  // aqua to deep navy
-    {"jungle", {{65, 275, 24}, {14, 212, 70}, {5, 140, 78}, {2, 58, 40}}, {150, 120, 130}},    // the neon green to deep teal
+    {"fire", {{290, 225, 70}, {285, 135, 15}, {225, 45, 5}, {105, 5, 4}}, {110, 100, 70}, BLAST},       // gold to dark red
+    {"ocean", {{120, 240, 290}, {25, 150, 275}, {6, 60, 200}, {3, 10, 72}}, {110, 115, 100}, POUR},     // aqua to deep navy
+    {"jungle", {{65, 275, 24}, {14, 212, 70}, {5, 140, 78}, {2, 58, 40}}, {150, 120, 130}, BALLOON},   // the neon green to deep teal
 };
 constexpr int PALETTE_COUNT = sizeof(PALETTES) / sizeof(PALETTES[0]);
 constexpr float DARK_SIDE = 0.7f;
@@ -771,14 +827,64 @@ static bool insideScreen(int32_t x, int32_t y) {
   return (uint32_t)(ax * ax + ay * ay) <= (uint32_t)ARC_REACH_Q10 * (uint32_t)ARC_REACH_Q10;
 }
 
-// A still pool at about the spacing it settles to: on the floor, rows from the bottom up, or
-// against the top edge, rows from the top down, to fall from there.
-static void layPool(bool onFloor) {
-  constexpr float SPACING = 2.1f * RADIUS_PX, ROW_GAP = SPACING * 0.866f;
+constexpr float SPACING_PX = 2.1f * RADIUS_PX;  // about how far apart the balls of a settled pool sit
+constexpr float ROW_GAP_PX = SPACING_PX * 0.866f;
+// A settled pool is squeezed that tight by its own weight. Laid out that tight anywhere else,
+// it springs apart. The fireball wants that, but the balloon would burst across the screen in
+// a tenth of a second and the lake's top rows would peel off one by one, so those are looser.
+constexpr float LOOSE_SPACING_PX = 2.6f * RADIUS_PX;
+// The balloon keeps this far from the edges. It keeps off the rounded corners too: 12 px in
+// from both edges is 17 px from the corner arc's centre, and a ball's centre may be 21 from it.
+constexpr float MARGIN_PX = 12;
+constexpr float GAP_PX = 30;    // the ocean's ledge stops this short of each edge, for the water to pour through
+constexpr float SLOPE = 0.45f;  // and slopes down this steeply from its ridge, about 24 degrees
+
+static uint32_t nextNoise() {  // xorshift
+  noise ^= noise << 13;
+  noise ^= noise >> 17;
+  noise ^= noise << 5;
+  return noise;
+}
+
+static float noiseBetween() {  // -1 to 1
+  return (nextNoise() & 0xFFFF) * (2.0f / 65535) - 1;
+}
+
+// Every ball still, where it was just put.
+static void stillFromHere() {
+  for (int i = 0; i < COUNT; i++) {
+    Ball &ball = balls[i];
+    ball.vx = ball.vy = 0;
+    ball.oldX = ball.x;
+    ball.oldY = ball.y;
+    ball.crowd = ball.closeCrowd = 0;
+    shownX[i] = (ball.x + (1 << 13)) >> 14;
+    shownY[i] = (ball.y + (1 << 13)) >> 14;
+    order[i] = i;
+  }
+  pairsStale = true;
+}
+
+// What the pool does as a whole is taken out, so it comes apart where it is.
+static void noDrift() {
+  int64_t sumX = 0, sumY = 0;
+  for (int i = 0; i < COUNT; i++) {
+    sumX += balls[i].vx;
+    sumY += balls[i].vy;
+  }
+  int32_t driftX = (int32_t)(sumX / COUNT), driftY = (int32_t)(sumY / COUNT);
+  for (int i = 0; i < COUNT; i++) {
+    balls[i].vx -= driftX;
+    balls[i].vy -= driftY;
+  }
+}
+
+// A still pool on the floor, in rows from the bottom up.
+static void layPool() {
   int placed = 0;
   for (int r = 0; placed < COUNT; r++) {
-    float y = onFloor ? HEIGHT - RADIUS_PX - r * ROW_GAP : RADIUS_PX + r * ROW_GAP;
-    for (float x = SPACING * (r & 1 ? 0.75f : 0.25f); x < WIDTH && placed < COUNT; x += SPACING) {
+    float y = HEIGHT - RADIUS_PX - r * ROW_GAP_PX;
+    for (float x = SPACING_PX * (r & 1 ? 0.75f : 0.25f); x < WIDTH && placed < COUNT; x += SPACING_PX) {
       int32_t px = (int32_t)(x * ONE), py = (int32_t)(y * ONE);
       if (!insideScreen(px, py)) continue;
       balls[placed].x = px;
@@ -786,16 +892,113 @@ static void layPool(bool onFloor) {
       placed++;
     }
   }
+  stillFromHere();
+}
+
+// A round cluster with its balls about spacing apart. A golden-angle spiral fills the disc
+// evenly with no rows to come apart along, and it starts at a new angle each time.
+static float discRadius(float spacing) {
+  return sqrtf(COUNT * 0.866f * spacing * spacing / 3.14159f);
+}
+
+static void layDisc(float cx, float cy, float radius) {
+  float turn = (nextNoise() & 0xFFFF) * (6.28319f / 65536);
   for (int i = 0; i < COUNT; i++) {
-    Ball &ball = balls[i];
-    ball.vx = ball.vy = 0;
-    ball.oldX = ball.x;
-    ball.oldY = ball.y;
-    shownX[i] = (ball.x + (1 << 13)) >> 14;
-    shownY[i] = (ball.y + (1 << 13)) >> 14;
-    order[i] = i;
+    float r = radius * sqrtf((i + 0.5f) / COUNT), a = turn + i * 2.39996f;
+    balls[i].x = (int32_t)((cx + r * cosf(a)) * ONE);
+    balls[i].y = (int32_t)((cy + r * sinf(a)) * ONE);
   }
-  pairsStale = true;
+  stillFromHere();
+}
+
+// Jungle: water in a balloon, as far up against gravity as it fits. It pops: a small push each
+// its own way makes it break into drops as it falls, instead of swelling as one disc.
+static void layBalloon() {
+  const float radius = discRadius(LOOSE_SPACING_PX);
+  // Across a zero, the room divides to infinity, which never wins.
+  float up = fminf((WIDTH / 2 - radius - MARGIN_PX) / fabsf(upX), (HEIGHT / 2 - radius - MARGIN_PX) / fabsf(upY));
+  layDisc(WIDTH / 2 + upX * up, HEIGHT / 2 + upY * up, radius);
+  constexpr int32_t MOST = (int32_t)(BURST_PX / STEPS_PER_SECOND * 65536.0f);
+  for (int i = 0; i < COUNT; i++) {
+    balls[i].vx = (int32_t)(nextNoise() % (2 * MOST + 1)) - MOST;
+    balls[i].vy = (int32_t)(nextNoise() % (2 * MOST + 1)) - MOST;
+  }
+  noDrift();
+}
+
+// Fire: a fireball in the middle, as tight as a settled pool, explodes. Every ball flies
+// straight out, the outside fastest, each a little off in speed and line so it scatters, and
+// hits a wall. Its own pressure adds to the blast.
+static void layFireball() {
+  constexpr float CORE = 0.4f;  // the middle's share of the outside's speed
+  constexpr float SPEED = BLAST_PX / STEPS_PER_SECOND * 65536.0f;  // Q16 px per step
+  const float radius = discRadius(SPACING_PX);
+  layDisc(WIDTH / 2, HEIGHT / 2, radius);
+  for (int i = 0; i < COUNT; i++) {
+    float dx = balls[i].x * (1.0f / ONE) - WIDTH / 2, dy = balls[i].y * (1.0f / ONE) - HEIGHT / 2;
+    float r = sqrtf(dx * dx + dy * dy);  // never 0: the spiral's first ball is off the middle
+    float out = SPEED * (CORE + (1 - CORE) * r / radius) * (1 + 0.2f * noiseBetween()) / r;
+    float off = 0.2f * noiseBetween();  // across, as a share of the speed out
+    balls[i].vx = (int32_t)(out * (dx - off * dy));
+    balls[i].vy = (int32_t)(out * (dy + off * dx));
+  }
+  noDrift();
+}
+
+// The point h up and s across from the middle of the screen, in Q16 px, and whether a ball's
+// centre can be there.
+static bool screenPoint(float h, float s, int32_t &x, int32_t &y) {
+  x = (int32_t)((WIDTH / 2 + h * upX - s * upY) * ONE);
+  y = (int32_t)((HEIGHT / 2 + h * upY + s * upX) * ONE);
+  return insideScreen(x, y);
+}
+
+// Ocean: water draped over a low ridge up against gravity. The ridge slopes down both ways and
+// stops short of each edge: the water over the gaps falls straight away, the rest slides off
+// both ends after it, and it all pours down the sides.
+static void layLake() {
+  const float top = fabsf(upX) * (WIDTH / 2 - RADIUS_PX) + fabsf(upY) * (HEIGHT / 2 - RADIUS_PX);
+  // Rows bent over the ridge, from the top down. A row's middle is ridge high, its sides slope
+  // away as the ridge does, and it fills from the middle out, so the last row is centred.
+  float ridge = top;
+  int placed = 0;
+  for (int r = 0; placed < COUNT; r++) {
+    ridge = top - r * LOOSE_SPACING_PX * 0.866f;
+    for (int k = 0; k < 2 * HALF_DIAGONAL_PX / LOOSE_SPACING_PX && placed < COUNT; k++) {
+      float s = r & 1 ? (k >> 1) + 0.5f : (k + 1) >> 1;  // 0, 1, 1, 2, 2... or 0.5, 0.5, 1.5...
+      if ((k & 1) != (r & 1)) s = -s;                      // each to both sides in turn
+      s *= LOOSE_SPACING_PX;
+      int32_t x, y;
+      if (!screenPoint(ridge - SLOPE * fabsf(s), s, x, y)) continue;
+      balls[placed].x = x;
+      balls[placed].y = y;
+      placed++;
+    }
+  }
+  stillFromHere();
+
+  // The ledge is the lowest row's ridge, out each way to the edge of the screen less a gap.
+  float reach[2];
+  for (int side = 0; side < 2; side++) {
+    float s = 0, way = side ? 1.0f : -1.0f;
+    int32_t x, y;
+    while (s < HALF_DIAGONAL_PX && screenPoint(ridge - SLOPE * (s + 0.5f), way * (s + 0.5f), x, y)) s += 0.5f;
+    reach[side] = s - GAP_PX;
+  }
+  ledgeUpX = lroundf(upX * 16384);
+  ledgeUpY = lroundf(upY * 16384);
+  ledgeHeight = lroundf(ridge * 256);
+  ledgeFrom = lroundf(-reach[0] * 256);
+  ledgeTo = lroundf(reach[1] * 256);
+  ledgeSlope = lroundf(SLOPE * 16384);
+  // Square to each side's slope, and as long as a push of the height a ball is under needs to
+  // be to put it back on the surface.
+  for (int side = 0; side < 2; side++) {
+    float out = side ? SLOPE : -SLOPE;
+    ledgeOutX[side] = lroundf((upX - out * upY) / (1 + SLOPE * SLOPE) * 16384);
+    ledgeOutY[side] = lroundf((upY + out * upX) / (1 + SLOPE * SLOPE) * 16384);
+  }
+  ledgeSteps = (int)(POUR_S * STEPS_PER_SECOND + 0.5f);
 }
 
 void begin(int palette) {
@@ -806,14 +1009,20 @@ void begin(int palette) {
 
   lightGrid();
   buildKeys();
-  layPool(true);
+  layPool();
   upX = 0;
   upY = -1;
+  ledgeSteps = 0;
   setPalette(palette);
 }
 
 void dropIn(int palette) {
-  layPool(false);
+  ledgeSteps = 0;
+  switch (PALETTES[palette % PALETTE_COUNT].entrance) {
+    case BLAST: layFireball(); break;
+    case POUR: layLake(); break;
+    case BALLOON: layBalloon(); break;
+  }
   setPalette(palette);
 }
 

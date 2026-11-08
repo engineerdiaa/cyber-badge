@@ -30,6 +30,9 @@ constexpr int   SHADES = 16;              // steps in a gradient, from the top o
 constexpr float LAYER_G = 0.2f;           // g along the screen the layers need to turn; lying flat, they keep their last way up
 constexpr bool  MIXING = true;            // colours travel with the balls, so a shake stirs the layers. false: they never mix
 constexpr float SETTLE_S = 0.5f;          // mixed colours settle back into layers, most of the way in 3x this, once balls are still
+constexpr float BLAST_PX = 1000.0f;       // px/s: BOOT into fire, and a fireball explodes this hard, out to every wall
+constexpr float POUR_S = 1.0f;            // BOOT into ocean: how long the water is held up along the top while it pours off both ends
+constexpr float BURST_PX = 60.0f;         // px/s: BOOT into jungle, and a balloon pops this hard, so it breaks into drops as it falls
 
 constexpr int WIDTH = 240, HEIGHT = 280;
 
@@ -50,7 +53,7 @@ void step();                         // one physics step of 1/STEPS_PER_SECOND s
 int movingBalls();                   // how many balls are visibly moving
 void redrawAll();                    // the next draw() repaints the whole screen
 bool draw(PushFn push, IdleFn idle); // sends what changed; idle() runs while each row goes out by DMA
-void dropIn(int palette);            // a fresh pool falls from the top edge in palette 0 to paletteCount() - 1: fire, ocean, jungle
+void dropIn(int palette);            // a fresh pool in palette 0 to paletteCount() - 1: fire explodes, ocean pours down the sides, jungle's balloon pops
 int paletteCount();
 const char *paletteName(int palette);
 

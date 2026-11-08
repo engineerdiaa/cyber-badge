@@ -35,8 +35,9 @@ FQBN: `esp32:esp32:nologo_esp32c3_super_mini:PartitionScheme=huge_app,CDCOnBoot=
 6. **Check it.** `arduino-cli monitor -p <port> -c baudrate=115200,dtr=off,rts=off` for about
    15 seconds (DTR/RTS off so it doesn't reset the chip). Expect
    `[main] 16.0 fps, slowest frame 60–70 ms (DMA)`. `OLED not found` means the OLED's SDA/SCL
-   (pins 3 and 4) or power. With the motion sensor, the badge starts with the balls:
+   (pins 3 and 4) or power. With the motion sensor, it starts on the video too; shake it (there,
+   back and there again) and the balls show:
    `[dots] 28–58 fps, physics 36–56% of the CPU, running at 99–100% of real time` until they've
-   been still for 3 s, then the video line. `Sensor not found - video only` is fine without a
+   been still for 3 s, then the video line again. `Sensor not found - video only` is fine without a
    sensor; with one, check its wiring (README, "Motion sensor"). For anything else, use the
    README's troubleshooting table.

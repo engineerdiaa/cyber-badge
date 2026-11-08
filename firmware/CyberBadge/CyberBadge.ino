@@ -8,8 +8,9 @@
 //      TFT shows a pool of balls that flows like water with the real motion, in layers
 //      of colour: fire, ocean or jungle. Once the balls have been still for 3 s the video
 //      comes back. No sensor: it just plays the video.
-// BOOT button: switches video, or, while the balls show, drops in a fresh pool in the
-//      next colours. Both choices survive power-off.
+// BOOT button: switches video, or, while the balls show, brings in a fresh pool in the
+//      next colours: fire explodes, ocean pours down the sides, jungle's balloon pops.
+//      Both choices survive power-off.
 //
 // Arduino IDE settings (Tools menu):
 //   Board:            Nologo ESP32C3 Super Mini
@@ -249,7 +250,7 @@ void dotsFrame() {
   }
 }
 
-// A fresh pool in the next colours falls in from the top, with a full IDLE_MS to show off.
+// A fresh pool in the next colours comes in its own way, with a full IDLE_MS to show off.
 void switchGradient() {
   gradient = (gradient + 1) % dots::paletteCount();
   prefs.putUChar("gradient", gradient);
@@ -388,15 +389,15 @@ void setup() {
   prefs.begin("cyberbadge");
   current = prefs.getUChar("clip", 0) % VIDEO_COUNT;  // last clip picked with BOOT
 
+  // The video always comes first; the balls wait for a shake.
   sensorFound = imu::begin();
   if (sensorFound) {
     gradient = prefs.getUChar("gradient", 0) % dots::paletteCount();  // last colours picked with BOOT
     dots::begin(gradient);
-    startDots();
   } else {
     Serial.println("Sensor not found - video only");
-    startVideo();
   }
+  startVideo();
 }
 
 void loop() {
