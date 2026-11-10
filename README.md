@@ -4,7 +4,7 @@
 The clip comes with built-in effects: scene labels that type themselves in (`01 // TRAIN`), and a word that flows around you like a halo.
 Add the optional motion sensor and a shake turns the screen into a pool of balls that flows like water as you move, in layers of color: fire, ocean or jungle.
 
-<!-- TODO: add photos of the finished badge (images/badge_front.jpg, images/badge_back.jpg) -->
+<!-- TODO: add a photo of the finished badge's front (images/badge_front.jpg); the back is in step 11 -->
 <p align="center">
   <img src="images/teaser.webp" width="640" alt="Working badge preview: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
   <br>
@@ -283,7 +283,7 @@ Skip this step for a badge that just plays the video.
 
 1. If the sensor's pin labels are on the side without the chip, take a photo of them first: that side ends up facing the board.
 2. Solder its header so the **chip faces away from the board**, using the perfboard as a jig ([step 3](#3-solder-the-headers-using-the-perfboard-as-a-jig)).
-3. Place it on the back as in the [board layout](#board-layout): square to the edges, with its **y axis pointing at the top edge**, away from the TP4056.
+3. Place it on the back as in the [board layout](#board-layout): square to the edges, with its **y axis pointing at the top edge**, away from the TP4056 (see the [finished back](#11-finish)).
 4. Wire it from the [table](#motion-sensor-optional), with two short jumpers on the sensor itself: **CS to 3V3** and **SA0 to GND**.
 5. Press **RESET**. The video plays as before. Shake the badge there, back and there again, and the balls take over the screen in their palette's own way; the video comes back once they've been still for 3 seconds.
 
@@ -313,6 +313,10 @@ Then flip the switch on. The badge should boot from the battery.
 ### 11. Finish
 
 Insulate the back, stick the battery down with double-sided foam tape, and do a full charge with the switch **off**.
+
+This is the finished back: the TP4056 charger with its USB-C port at top left, the 600 mAh battery on the right, the motion sensor (purple) at the bottom and the slide switch in the bottom-left corner:
+
+<p align="center"><img src="images/board_back_finished.jpg" width="590" alt="Finished back of the perfboard: blue TP4056 charger board with USB-C at top left, a 3.7 V 600 mAh LiPo battery taking up the right half, the purple LSM6DS3 motion sensor at the bottom middle, a slide switch at the bottom-left corner, and red, black and green wires between them"></p>
 
 ---
 
