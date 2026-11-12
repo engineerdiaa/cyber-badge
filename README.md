@@ -6,9 +6,9 @@ Add the optional motion sensor and a shake turns the screen into a pool of balls
 
 <!-- TODO: add a photo of the finished badge's front (images/badge_front.jpg); the back is in step 11 -->
 <p align="center">
-  <img src="images/teaser.webp" width="640" alt="Working badge preview: the TFT plays a clip with scene labels, the OLED shows the name, title and a scrolling email">
+  <img src="images/teaser.webp" width="640" alt="Working badge preview: the TFT plays a clip with scene labels and the OLED shows the name, title and a scrolling email; then a shake turns the screen into balls of liquid that pour as the badge tilts, and BOOT brings in ocean and jungle colors">
   <br>
-  <sub>Working badge preview: the TFT loops the clip, the OLED shows the name tag with the email scrolling along the top</sub>
+  <sub>Working badge preview: the TFT loops the clip and the OLED shows the name tag with the email scrolling along the top. Then a shake turns the screen into liquid, and BOOT changes the colors.</sub>
 </p>
 
 ---
