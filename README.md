@@ -545,7 +545,7 @@ This repo includes a playbook, [`AGENTS.md`](AGENTS.md) (which `CLAUDE.md` loads
 
 Designed by **[@diaawastaken](https://www.instagram.com/diaawastaken/)** on Instagram. If you build one, share it and tag me for a shoutout! 🪪
 
-**Making content with this?** Videos, posts, tutorials or a build of your own: please credit **@diaawastaken** and link back to this repo. The guide, photos, videos and schematic are CC BY 4.0, so credit is required when you reuse them (see [License](#license)). If you post it on Instagram, tag me too. I'd love to see it.
+**Making content with this?** Videos, posts, tutorials or a build of your own: please credit **@diaawastaken** and link back to this repo. The guide, photos and videos are CC BY 4.0, so credit is required when you reuse them (see [License](#license)). If you post it on Instagram, tag me too. I'd love to see it.
 
 Uses [JPEGDEC](https://github.com/bitbank2/JPEGDEC) and [bb_spi_lcd](https://github.com/bitbank2/bb_spi_lcd) by Larry Bank, the [Adafruit GFX / SSD1306 / ST7789](https://github.com/adafruit) libraries, and [rembg](https://github.com/danielgatis/rembg) for the cut-outs.
 
