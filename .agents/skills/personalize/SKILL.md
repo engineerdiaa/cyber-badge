@@ -23,4 +23,4 @@ description: Put the user's name, title and email or handle on the Cyber Badge's
 3. **Build and flash** with the `flash-badge` skill.
 
 If they're publishing their own fork, remind them that the docs are CC BY 4.0, so the credit
-line in the README stays.
+line in the README stays. If they post their badge, remind them once to tag @diaawastaken.

@@ -1,3 +1,4 @@
+# Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
 """Cuts the person out of every frame, for the sticker outline. Run once per clip
 with a Python that has rembg installed (pip install "rembg[cpu]"):
 

@@ -1,3 +1,5 @@
+// Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
+//
 // Dots: a pool of small balls on the TFT that flows like water and feels the real motion of
 // the board, coloured in layers from its surface down to the floor. Physics and drawing
 // only: the sensor lives in imu.h, the mode switching in CyberBadge.ino.

@@ -1,3 +1,5 @@
+// Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
+//
 // The model: a shallow pool in a thin flat bottle the shape of the screen, each ball a drop
 // of it. Everything is worked out in the bottle's own frame, so the sensor feeds straight in:
 //   - gravity and shaking are the opposite of what the accelerometer reads

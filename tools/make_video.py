@@ -1,3 +1,4 @@
+# Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
 """Turn any video into an MJPEG header the ESP32-C3 plays straight from flash.
 Tall, wide or square clips all work: each frame is scaled to cover the 240x280
 panel and cropped to fit.

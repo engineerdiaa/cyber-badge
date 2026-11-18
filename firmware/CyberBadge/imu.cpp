@@ -1,3 +1,5 @@
+// Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
+
 #include "imu.h"
 #include <math.h>
 #include <string.h>

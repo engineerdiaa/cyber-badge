@@ -1,3 +1,5 @@
+// Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
+//
 // LSM6DS3 on the OLED's I2C bus. A task reads it, decides whether the badge has been shaken
 // on purpose or is lying on a table, and splits each reading into gravity and shaking.
 //

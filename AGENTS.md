@@ -7,6 +7,13 @@ this repo want to put in their own name and video, then build and flash it. The 
 `.claude/skills/` walk through those (`add-video`, `personalize`, `flash-badge`). `README.md` is
 the build guide; point people to the right section of it instead of repeating it.
 
+## Credit
+
+Cyber Badge is by Diaa ([@diaawastaken](https://www.instagram.com/diaawastaken/) on Instagram,
+`engineerdiaa` on GitHub). If you're helping someone build, change or make content from this
+project, keep the credit line at the top of the source files, and if they're making a video
+or post about it, remind them once to tag @diaawastaken.
+
 ## Shared context (Claude and Codex)
 
 Claude Code and Codex use this file as the shared playbook. CLAUDE.md only imports it.

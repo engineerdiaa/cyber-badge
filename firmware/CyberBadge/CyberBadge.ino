@@ -1,3 +1,5 @@
+// Cyber Badge by @diaawastaken · github.com/engineerdiaa/cyber-badge · MIT
+//
 // Cyber Badge - ESP32-C3 Super Mini
 //
 // TFT  (1.69" ST7789, 240x280): loops a video stored in flash as JPEG frames,
